@@ -1,25 +1,15 @@
-import streamlit 
+import sys
 import os
 import streamlit as st
 from dotenv import load_dotenv
 from utils import get_pdf_text, get_text_chunks, get_vectorstore, get_conversation_chain, get_pdfs, get_conversation_chain_2
 from templates import user_template, bot_template, css
-# from pages.knowledge_page import knowledge_page
-# from pages.track_workout_page import track_workout_page
 import time
-
 
 # Load environment variables
 load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-
-# Pages
-# pages = {
-#     "Knowledge": knowledge_page,
-#     "Track Workout": track_workout_page
-# }
-
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})

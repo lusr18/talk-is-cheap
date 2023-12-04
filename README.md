@@ -15,6 +15,17 @@ conda env create -f environment.yml
 ```
 
 ## running
+1. Create local databases
+```
+cd tools
+python create_db_script.py --db_script create_workout_db.sql
+```
+
+
+
+2. Run app.py with streamlit
 ```
 streamlit run app.py
 ```
+
+
