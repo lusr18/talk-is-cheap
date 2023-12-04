@@ -15,3 +15,6 @@ conda env create -f environment.yml
 ```
 
 ## running
+```
+streamlit run app.py
+```
