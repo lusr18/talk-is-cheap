@@ -47,7 +47,7 @@ def get_conversation_chain(vectorstore):
 def get_pdfs():
     file_path = os.path.expanduser("/home/ftpuser/")
     files = os.listdir(file_path)
-    pdfs = [pdf for pdf in files if pdf.endswith(".pdf")]
+    pdfs = [os.path.join(file_path, pdf) for pdf in files if pdf.endswith(".pdf")]
     return pdfs
 
 from persist_store import load_database
