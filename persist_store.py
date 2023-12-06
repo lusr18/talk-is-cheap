@@ -14,10 +14,10 @@ load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
-'''
+"""
 Example: https://www.youtube.com/watch?v=3yPBVii7Ct0&themeRefresh=1
 Description: Use chromadb to store embeddings that can be retrieved later
-'''
+"""
 def persist_embeddings():
     # Load and process multiple documents (PDFs)
     print("Loading PDFs")
@@ -86,13 +86,14 @@ def load_database():
     # docs = retriever.get_relevant_documents("Exercise")
     # print("Documents", len(docs))
     
-    # retriever = vectordb.as_retriever(search_kwargs={"k": 2})
+    # sets search limit to top k # of results
+    retriever = vectordb.as_retriever(search_kwargs={"k": 2})
     # print(retriever.search_type)
     
-    
+    #can pass in queries to retreivalqa
     return retriever
     
-    
+    '''
     # Make a chain to answer the questions
     qa_chain = RetrievalQA.from_chain_type(
         llm=OpenAI(),
@@ -109,8 +110,10 @@ def load_database():
     query = "How much exercise is best?"
     llm_response = qa_chain(query)
     print(llm_response)
+    '''
     
-    
+   
 if __name__ == "__main__":
-    # persist_embeddings()
-    load_database()
+    #persist_embeddings()
+    #load_database()
+    pass
