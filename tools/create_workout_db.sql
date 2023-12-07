@@ -1,3 +1,19 @@
+-- Create db
+-- CREATE DATABASE workout_tracker;
+
+
+-- Create user table
+CREATE TABLE user (
+    id             INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    username       VARCHAR(50) NOT NULL,
+    password       VARCHAR(255) NOT NULL,
+    email          VARCHAR(255) NOT NULL,
+    age            INT NOT NULL,
+    gender         INT NOT NULL
+);
+
+
+
 -- Create workout log table
 CREATE TABLE workout (
     workout_id      INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -10,7 +26,7 @@ CREATE TABLE workout (
     notes           VARCHAR(255)
 );
 
--- Create personal tracker table
+-- Create personal tracker table, tracks weight, height, body fat percentage
 CREATE TABLE personal_tracker (
     tracker_id              INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     record_date             DATE NOT NULL,
@@ -19,7 +35,7 @@ CREATE TABLE personal_tracker (
     body_fat_percentage     VARCHAR(255)
 );
 
--- TODO Create user table?
+
 
 
 -- Random data for testing
