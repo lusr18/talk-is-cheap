@@ -32,15 +32,18 @@ def numpy_from_string(string):
     workout_df = pd.DataFrame(workout_data, columns=["Date", "Weight"])
     return workout_df
 
-def question_to_sql(question):
+def question_to_sql(db, question):
     # TODO Set db connection open at start of the app instead of every time a question is asked
     # TODO Prompt some default questions
-    db = SQLDatabase.from_uri("sqlite:///personal_trainer.db")
+    # db = SQLDatabase.from_uri("sqlite:///personal.sqlite3")
     llm = OpenAI(temperature=0, max_tokens=1000)
     db_chain = SQLDatabaseChain(llm=llm, database=db, verbose=False)
     
+    print(db_chain.database)
+    
     try:
         response = db_chain.run(question)
+        
         
         workout_df = None
         if "graph" in question.lower():

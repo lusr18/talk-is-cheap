@@ -13,12 +13,12 @@ from pages.components.sqlite_interface import question_to_sql
 
 
 def main():
-    st.set_page_config(page_title="Track Workout Page", page_icon="📷", layout="wide")
+    st.set_page_config(page_title="Track Workout Page", page_icon="🏋️", layout="wide")
     
     thinking = False
 
-    st.header("📷 Track Workout Page")
-    st.write("This is the Track Workout Page ")
+    st.header("🏋️ Track Workout Page")
+    st.write("Ask me about your workouts ")
     
     # Session state to store the conversation
     if 'workout_conv' not in st.session_state:
@@ -38,16 +38,15 @@ def main():
         with st.chat_message("user"):
             st.write(prompt)
             
-            
+    
     # Generate a new response if last message is not from assistant
     if st.session_state.workout_conv[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 # TODO Make a call to ...
-                response, workout_df = question_to_sql(st.session_state.workout_conv[-1]["content"])
+                response, workout_df = question_to_sql(st.session_state.personal_db, st.session_state.workout_conv[-1]["content"])
                 placeholder = st.empty()
                 placeholder.markdown(response)
-                
                 if workout_df is not None:
                     st.line_chart(workout_df, x="Date", y="Weight")
                  

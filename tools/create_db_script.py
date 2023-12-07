@@ -37,6 +37,8 @@ def create_db(args):
         cursor.executescript(sql_script)
         conn.commit()
     except sqlite3.Error as e:
+        # Delete the database file if there is an error
+        os.remove(args.database_path)
         return e
     finally:
         if conn:

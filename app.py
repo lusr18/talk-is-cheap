@@ -6,10 +6,16 @@ from utils import get_pdf_text, get_text_chunks, get_vectorstore, get_conversati
 from templates import user_template, bot_template, css
 import time
 
+from langchain.utilities.sql_database import SQLDatabase
+
 # Load environment variables
 load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+# Session state to store db connection
+if "personal_db" not in st.session_state:
+    st.session_state.personal_db = SQLDatabase.from_uri("sqlite:///personal.sqlite3")
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -25,14 +31,14 @@ def handle_userinput(user_question):
 
 print(f"{time.time()} Refresh")
 
-
 def main():
     st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
     st.write(css, unsafe_allow_html=True)
-   
+    
+    
+    # Session state to store the conversation
     if "conversation" not in st.session_state:
         st.session_state.conversation = []
-        
         st.session_state.conversation = get_conversation_chain_2()
         
     if "chat_history" not in st.session_state:
