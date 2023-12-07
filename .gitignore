@@ -1,3 +1,7 @@
 **/.env
 __pycache__/
 db/
+
+# Don't include .sqlite3 or .db files
+*.sqlite3
+*.db
