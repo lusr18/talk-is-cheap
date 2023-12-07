@@ -7,6 +7,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceHub
+    
+import streamlit as st
 
 
 def get_pdf_text(pdf_docs):
@@ -60,3 +62,15 @@ def get_conversation_chain_2():
         memory=memory,        
     )
     return conversation_chain
+
+# Programatically navigate to a URL in streamlit
+def nav_to(st, url):
+    nav_script = """
+        <meta http-equiv="refresh" content="0; url='%s'">
+    """ % (url)
+    st.write(nav_script, unsafe_allow_html=True)    
+
+def load_bootstrap():
+    return st.markdown('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">', unsafe_allow_html=True)
+
+
