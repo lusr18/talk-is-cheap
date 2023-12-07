@@ -4,89 +4,110 @@
 
 -- Create user table
 CREATE TABLE user (
-    id             INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id             INTEGER  PRIMARY KEY,
     username       VARCHAR(50) NOT NULL,
     password       VARCHAR(255) NOT NULL,
     email          VARCHAR(255) NOT NULL,
     age            INT NOT NULL,
-    gender         INT NOT NULL
+    gender         INT NOT NULL,    -- 0 male, 1 female, 2 other
+    height         INT NOT NULL    -- cm
 );
 
-
-
--- Create workout log table
-CREATE TABLE workout (
-    workout_id      INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    workout_date    DATE NOT NULL,
+-- Create exercise table
+CREATE TABLE exercise (
+    id              INTEGER  PRIMARY KEY,
+    user_id         INT,
     exercise_name   VARCHAR(50) NOT NULL,
-    sets            INT NOT NULL,
-    reps            INT NOT NULL,
-    weight          DECIMAL(5,2),
-    duration        DECIMAL(5,2), -- Duration in minutes
-    notes           VARCHAR(255)
+    exercise_date   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    exercise_type   VARCHAR(50) NOT NULL,
+    sets            INT DEFAULT(0),
+    reps            INT DEFAULT(0),
+    weight          DECIMAL(5,2) DEFAULT(0), -- Weight in kg
+    duration        DECIMAL(5,2) DEFAULT(0), -- Duration in minutes
+    notes           VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
--- Create personal tracker table, tracks weight, height, body fat percentage
+-- Create nutrition table
+CREATE TABLE food (
+    id             INTEGER  PRIMARY KEY,
+    user_id        INT,
+    food_name      VARCHAR(50) NOT NULL,
+    food_date      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    calories       INT DEFAULT(0),
+    carbohydrates  INT DEFAULT(0),    -- grams
+    fat            INT DEFAULT(0),    -- grams
+    protein        INT DEFAULT(0),    -- grams
+    sodium         INT DEFAULT(0),    -- miligrams
+    sugar          INT DEFAULT(0),    -- grams
+    notes          VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+-- -- Create personal tracker
 CREATE TABLE personal_tracker (
-    tracker_id              INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    record_date             DATE NOT NULL,
-    weight                  DECIMAL(5,2) NOT NULL,
-    height                  DECIMAL(5,2) NOT NULL,
-    body_fat_percentage     VARCHAR(255)
+    id              INTEGER  PRIMARY KEY,
+    user_id         INT,
+    record_date     DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    weight          DECIMAL(5,2) NOT NULL,
+    body_fat        DECIMAL(5,2) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
+-- Random user data for testing
+INSERT INTO user (username, password, email, age, gender, height) VALUES
+    ('testuser1', 'password', 'testuser1@email.com', 25, 1, 180);
 
+-- Random personal tracker data for testing
+INSERT INTO personal_tracker (user_id, record_date, weight, body_fat) VALUES
+    (1, '2023-12-01', 80, 20),
+    (1, '2023-12-02', 79, 19),
+    (1, '2023-12-03', 78, 18),
+    (1, '2023-12-04', 77, 17),
+    (1, '2023-12-05', 76, 16),
+    (1, '2023-12-06', 75, 15),
+    (1, '2023-12-07', 74, 14),
+    (1, '2023-12-08', 73, 13),
+    (1, '2023-12-09', 72, 12),
+    (1, '2023-12-10', 71, 11),
+    (1, '2023-12-11', 70, 10);
 
+-- Random food data for testing
+INSERT INTO food (user_id, food_name, calories, carbohydrates, fat, protein, sodium, sugar) VALUES
+    (1, 'Apple', 95, 25, 0.3, 0.5, 2, 19),
+    (1, 'Chicken Sandwich', 350, 40, 9, 30, 650, 5),
+    (1, 'Bowl of Salad', 150, 10, 7, 5, 200, 4),
+    (1, 'Pizza Slice', 285, 36, 10, 12, 640, 3),
+    (1, 'Bowl of Oatmeal', 158, 27, 3.2, 5.5, 7, 1);
 
--- Random data for testing
-INSERT INTO workout (workout_id, workout_date, exercise_name, sets, reps, weight, notes) VALUES
-(1, '2023-12-01', 'Bench Press', 4, 10, 56, ''),
-(2, '2023-12-01', 'Squats', 4, 12, 80, ''),
-(3, '2023-12-01', 'Deadlift', 3, 8, 100, ''),
-(4, '2023-12-01', 'Pull-ups', 3, 10, NULL, 'Bodyweight'),
-(5, '2023-12-01', 'Overhead Press', 3, 10, 40, ''),
-(6, '2023-12-02', 'Barbell Row', 3, 10, 50, ''),
-(7, '2023-12-02', 'Bicep Curl', 3, 12, 15, ''),
-(8, '2023-12-02', 'Tricep Dip', 3, 10, NULL, 'Bodyweight'),
-(9, '2023-12-02', 'Leg Press', 4, 12, 90, ''),
-(10, '2023-12-02', 'Lat Pulldown', 3, 10, 45, ''),
-(11, '2023-12-02', 'Bench Press', 4, 10, 58, ''),
-(12, '2023-12-02', 'Squats', 4, 12, 82.5, ''),
-(13, '2023-12-02', 'Deadlift', 3, 8, 102.5, ''),
-(14, '2023-12-02', 'Pull-ups', 3, 10, NULL, 'Bodyweight'),
-(15, '2023-12-02', 'Overhead Press', 3, 10, 42.5, ''),
-(16, '2023-12-03', 'Barbell Row', 3, 10, 52.5, ''),
-(17, '2023-12-03', 'Bicep Curl', 3, 12, 17.5, ''),
-(18, '2023-12-03', 'Tricep Dip', 3, 10, NULL, 'Bodyweight'),
-(19, '2023-12-03', 'Leg Press', 4, 12, 95, ''),
-(20, '2023-12-03', 'Lat Pulldown', 3, 10, 47.5, ''),
-(21, '2023-12-03', 'Bench Press', 4, 10, 59, ''),
-(22, '2023-12-03', 'Squats', 4, 12, 85, ''),
-(23, '2023-12-03', 'Deadlift', 3, 8, 105, ''),
-(24, '2023-12-03', 'Pull-ups', 3, 10, NULL, 'Bodyweight'),
-(25, '2023-12-03', 'Overhead Press', 3, 10, 45, ''),
-(26, '2023-12-04', 'Bench Press', 4, 10, 60, ''),
-(27, '2023-12-05', 'Bench Press', 4, 10, 62.5, ''),
-(28, '2023-12-06', 'Bench Press', 4, 10, 65, ''),
-(29, '2023-12-07', 'Bench Press', 4, 10, 67.5, ''),
-(30, '2023-12-08', 'Bench Press', 4, 10, 70, ''),
-(31, '2023-12-09', 'Bench Press', 4, 10, 72.5, ''),
-(32, '2023-12-10', 'Bench Press', 4, 10, 75, ''),
-(33, '2023-12-11', 'Bench Press', 4, 10, 77.5, ''),
-(34, '2023-12-12', 'Bench Press', 4, 10, 80, ''),
-(35, '2023-12-13', 'Bench Press', 4, 10, 82.5, ''),
-(36, '2023-12-14', 'Bench Press', 4, 10, 85, ''),
-(37, '2023-12-15', 'Bench Press', 4, 10, 87.5, ''),
-(38, '2023-12-16', 'Bench Press', 4, 10, 90, ''),
-(39, '2023-12-17', 'Bench Press', 4, 10, 92.5, ''),
-(40, '2023-12-18', 'Bench Press', 4, 10, 95, ''),
-(41, '2023-12-19', 'Bench Press', 4, 10, 97.5, ''),
-(42, '2023-12-20', 'Bench Press', 4, 10, 100, ''),
-(43, '2023-12-21', 'Bench Press', 4, 10, 102.5, ''),
-(44, '2023-12-22', 'Bench Press', 4, 10, 105, ''),
-(45, '2023-12-23', 'Bench Press', 4, 10, 107.5, ''),
-(46, '2023-12-24', 'Bench Press', 4, 10, 110, ''),
-(47, '2023-12-25', 'Bench Press', 4, 10, 112.5, ''),
-(48, '2023-12-26', 'Bench Press', 4, 10, 115, ''),
-(49, '2023-12-27', 'Bench Press', 4, 10, 117.5, ''),
-(50, '2023-12-28', 'Bench Press', 4, 10, 120, '');
+-- -- Random workout data for testing
+INSERT INTO exercise (user_id, exercise_date, exercise_name, exercise_type, sets, reps, weight, duration) VALUES
+-- 2023-01-01 (Leg Day)
+(1, '2023-01-01 08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
+(1, '2023-01-01 08:30:00', 'Squat', 'Weightlifting', 3, 10, 80, 30),
+(1, '2023-01-01 09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 100, 30),
+
+-- 2023-01-04 (Chest Day)
+(1, '2023-01-04 08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 62.5, 30),
+(1, '2023-01-04 08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 30, 30),
+(1, '2023-01-04 09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 15, 30),
+
+-- 2023-01-07 (Pull Day)
+(1, '2023-01-07 08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+(1, '2023-01-07 08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 55, 30),
+(1, '2023-01-07 09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 50, 30),
+
+-- 2023-01-11 (Chest Day)
+(1, '2023-01-11 08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 65, 30),
+(1, '2023-01-11 08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 32.5, 30),
+(1, '2023-01-11 09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 17.5, 30),
+
+-- 2023-01-14 (Leg Day)
+(1, '2023-01-14 08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 62.5, 30),
+(1, '2023-01-14 08:30:00', 'Squat', 'Weightlifting', 3, 10, 82.5, 30),
+(1, '2023-01-14 09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 102.5, 30),
+
+-- 2023-01-17 (Pull Day)
+(1, '2023-01-17 08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+(1, '2023-01-17 08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 57.5, 30),
+(1, '2023-01-17 09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 52.5, 30);
