@@ -1,17 +1,45 @@
 import sys
 import os
-import streamlit as st
-from dotenv import load_dotenv
-from utils import get_pdf_text, get_text_chunks, get_vectorstore, get_conversation_chain, get_pdfs, get_conversation_chain_2
-from templates import user_template, bot_template, css
 import time
+import yaml
+from yaml.loader import SafeLoader
+
+import streamlit as st
+import streamlit_authenticator as stauth
+from streamlit_authenticator import Authenticate
+from dotenv import load_dotenv
+
+from utils import get_pdf_text, get_text_chunks, get_vectorstore, \
+    get_conversation_chain, get_pdfs, get_conversation_chain_2
+    
+from templates import user_template, bot_template, css
 
 from langchain.utilities.sql_database import SQLDatabase
+
 
 # Load environment variables
 load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+# Set page config
+st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
+
+
+# Authentication
+with open('authconf.yml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+    print(config)
+    
+if "authenticator" not in st.session_state:
+    st.session_state.authenticator = Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days'],
+        config['preauthorized']
+    )
+
 
 # Session state to store db connection
 if "personal_db" not in st.session_state:
@@ -31,16 +59,16 @@ def handle_userinput(user_question):
 
 print(f"{time.time()} Refresh")
 
-def main():
-    st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
+def main():    
     st.write(css, unsafe_allow_html=True)
-    
-    
+
+
     # Session state to store the conversation
     if "conversation" not in st.session_state:
         st.session_state.conversation = []
         st.session_state.conversation = get_conversation_chain_2()
         
+    # Session state to store the chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
         
@@ -51,8 +79,13 @@ def main():
         
     
     with st.sidebar:
-        st.subheader("List of PDFs")
+        # Logout button
+        if "authentication_status" in st.session_state and st.session_state["authentication_status"]:
+            st.write(f'Welcome *{st.session_state["name"]}*')
+            st.session_state.authenticator.logout('Logout', 'main')
+        
         # List of PDFs on sidebar
+        st.subheader("List of PDFs")
         pdfs = get_pdfs() 
         for pdf in pdfs:
             st.write(pdf)
@@ -87,6 +120,26 @@ def main():
     # elif page == "Track Workout":
     #     pages[page]()
         
+        
+def login_form():
+    name, authentication_status, username = st.session_state.authenticator.login('Login', 'main')
+    print("Login Status", name, authentication_status, username)
+    
+    if st.session_state["authentication_status"]:
+        # authenticator.logout('Logout', 'main')
+        # st.write(f'Welcome *{st.session_state["name"]}*')
+        # st.title('Some content')
+        main()
+    elif st.session_state["authentication_status"] == False:
+        st.error('Username/password is incorrect')
+    elif st.session_state["authentication_status"] == None:
+        st.warning('Please enter your username and password')
+
 
 if __name__ == '__main__':
-    main()
+    # TODO Create browser cookie to store authentication status
+    if st.session_state["authentication_status"] == None:
+        login_form()
+    else:
+        main()
+    # main()

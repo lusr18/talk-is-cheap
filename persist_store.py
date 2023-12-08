@@ -75,13 +75,13 @@ def load_database():
     embeddings = OpenAIEmbeddings()
     
     # Load the database from disks
-    print("Loading database")
+    # print("Loading database")
     vectordb = Chroma(
         persist_directory=persist_directory,
         embedding_function=embeddings)
     
     # Make a retriever
-    print("Making retriever")
+    # print("Making retriever")
     retriever = vectordb.as_retriever()
     # docs = retriever.get_relevant_documents("Exercise")
     # print("Documents", len(docs))

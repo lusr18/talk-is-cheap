@@ -18,7 +18,8 @@ CREATE TABLE exercise (
     id              INTEGER  PRIMARY KEY,
     user_id         INT,
     exercise_name   VARCHAR(50) NOT NULL,
-    exercise_date   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    exercise_date   DATE NOT NULL DEFAULT CURRENT_DATE,
+    -- exercise_time   TIME NOT NULL DEFAULT CURRENT_TIME,
     exercise_type   VARCHAR(50) NOT NULL,
     sets            INT DEFAULT(0),
     reps            INT DEFAULT(0),
@@ -83,31 +84,67 @@ INSERT INTO food (user_id, food_name, calories, carbohydrates, fat, protein, sod
 -- -- Random workout data for testing
 INSERT INTO exercise (user_id, exercise_date, exercise_name, exercise_type, sets, reps, weight, duration) VALUES
 -- 2023-01-01 (Leg Day)
-(1, '2023-01-01 08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
-(1, '2023-01-01 08:30:00', 'Squat', 'Weightlifting', 3, 10, 80, 30),
-(1, '2023-01-01 09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 100, 30),
+(1, '2023-01-01', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
+(1, '2023-01-01', 'Squat', 'Weightlifting', 3, 10, 80, 30),
+(1, '2023-01-01', 'Deadlift', 'Weightlifting', 3, 10, 100, 30),
 
 -- 2023-01-04 (Chest Day)
-(1, '2023-01-04 08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 62.5, 30),
-(1, '2023-01-04 08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 30, 30),
-(1, '2023-01-04 09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 15, 30),
+(1, '2023-01-04', 'Bench Press', 'Weightlifting', 3, 12, 62.5, 30),
+(1, '2023-01-04', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 30, 30),
+(1, '2023-01-04', 'Chest Fly', 'Weightlifting', 3, 12, 15, 30),
 
 -- 2023-01-07 (Pull Day)
-(1, '2023-01-07 08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
-(1, '2023-01-07 08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 55, 30),
-(1, '2023-01-07 09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 50, 30),
+(1, '2023-01-07', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+(1, '2023-01-07', 'Bent Over Rows', 'Weightlifting', 3, 10, 55, 30),
+(1, '2023-01-07', 'Lat Pulldowns', 'Weightlifting', 3, 10, 50, 30),
 
 -- 2023-01-11 (Chest Day)
-(1, '2023-01-11 08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 65, 30),
-(1, '2023-01-11 08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 32.5, 30),
-(1, '2023-01-11 09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 17.5, 30),
+(1, '2023-01-11', 'Bench Press', 'Weightlifting', 3, 12, 65, 30),
+(1, '2023-01-11', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 32.5, 30),
+(1, '2023-01-11', 'Chest Fly', 'Weightlifting', 3, 12, 17.5, 30),
 
 -- 2023-01-14 (Leg Day)
-(1, '2023-01-14 08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 62.5, 30),
-(1, '2023-01-14 08:30:00', 'Squat', 'Weightlifting', 3, 10, 82.5, 30),
-(1, '2023-01-14 09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 102.5, 30),
+(1, '2023-01-14', 'Bench Press', 'Weightlifting', 3, 10, 62.5, 30),
+(1, '2023-01-14', 'Squat', 'Weightlifting', 3, 10, 82.5, 30),
+(1, '2023-01-14', 'Deadlift', 'Weightlifting', 3, 10, 102.5, 30),
 
 -- 2023-01-17 (Pull Day)
-(1, '2023-01-17 08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
-(1, '2023-01-17 08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 57.5, 30),
-(1, '2023-01-17 09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 52.5, 30);
+(1, '2023-01-17', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+(1, '2023-01-17', 'Bent Over Rows', 'Weightlifting', 3, 10, 57.5, 30),
+(1, '2023-01-17', 'Lat Pulldowns', 'Weightlifting', 3, 10, 52.5, 30);
+
+
+
+
+
+
+-- INSERT INTO exercise (user_id, exercise_date, exercise_time, exercise_name, exercise_type, sets, reps, weight, duration) VALUES
+-- -- 2023-01-01 (Leg Day)
+-- (1, '2023-01-01', '08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
+-- (1, '2023-01-01', '08:30:00', 'Squat', 'Weightlifting', 3, 10, 80, 30),
+-- (1, '2023-01-01', '09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 100, 30),
+
+-- -- 2023-01-04 (Chest Day)
+-- (1, '2023-01-04', '08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 62.5, 30),
+-- (1, '2023-01-04', '08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 30, 30),
+-- (1, '2023-01-04', '09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 15, 30),
+
+-- -- 2023-01-07 (Pull Day)
+-- (1, '2023-01-07', '08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+-- (1, '2023-01-07', '08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 55, 30),
+-- (1, '2023-01-07', '09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 50, 30),
+
+-- -- 2023-01-11 (Chest Day)
+-- (1, '2023-01-11', '08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 65, 30),
+-- (1, '2023-01-11', '08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 32.5, 30),
+-- (1, '2023-01-11', '09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 17.5, 30),
+
+-- -- 2023-01-14 (Leg Day)
+-- (1, '2023-01-14', '08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 62.5, 30),
+-- (1, '2023-01-14', '08:30:00', 'Squat', 'Weightlifting', 3, 10, 82.5, 30),
+-- (1, '2023-01-14', '09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 102.5, 30),
+
+-- -- 2023-01-17 (Pull Day)
+-- (1, '2023-01-17', '08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
+-- (1, '2023-01-17', '08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 57.5, 30),
+-- (1, '2023-01-17', '09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 52.5, 30);
