@@ -3,6 +3,8 @@ __pycache__/
 db/
 temp/
 
+personal_notes.md
+
 # Don't include .sqlite3 or .db files
 *.sqlite3
 *.db

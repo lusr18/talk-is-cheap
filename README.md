@@ -1,7 +1,6 @@
 # talk-is-cheap
 Multi-modal AI application for research based fitness and diet coaching. 
 
-
 ## environment
 1. create a `.env` file and create the following 
 ```
@@ -18,7 +17,7 @@ conda env create -f environment.yml
 1. Create local databases
 ```
 cd tools
-python create_db_script.py --sql_script create_workout_db.sql --database_path personal.sqlite3
+python create_db_script.py --sql_script create_workout_db.sql --database_path ../personal.sqlite3
 ```
 
 2. Run app.py with streamlit

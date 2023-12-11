@@ -33,7 +33,7 @@ assistant_default_responses = [
 def reset_conversation():
     st.session_state.workout_conv = None
     st.session_state.workout_conv = assistant_default_responses
-
+    
 
 def main():
     st.set_page_config(page_title="Fitness Trainer", page_icon="🏋️", layout="wide")
@@ -81,7 +81,6 @@ def main():
                         
                         
                     # st.button(prompt, on_click=lambda prompt=prompt: st.session_state.workout_conv.append({"role": "user", "content": prompt}))
-                        
                     
     # Chat input
     if prompt := st.chat_input(disabled=thinking):
