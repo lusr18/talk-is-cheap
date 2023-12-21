@@ -29,6 +29,13 @@ CREATE TABLE exercise (
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
+--Create exercise routine
+CREATE TABLE exercise_routine (
+    id             INTEGER PRIMARY KEY,
+    routine_name   VARCHAR(255) NOT NULL,
+    routine_plan   VARCHAR(255) NOT NULL
+);
+
 -- Create nutrition table
 CREATE TABLE food (
     id             INTEGER  PRIMARY KEY,
@@ -45,7 +52,7 @@ CREATE TABLE food (
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
--- -- Create personal tracker
+-- Create personal tracker
 CREATE TABLE personal_tracker (
     id              INTEGER  PRIMARY KEY,
     user_id         INT,
@@ -54,6 +61,7 @@ CREATE TABLE personal_tracker (
     body_fat        DECIMAL(5,2) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+
 
 -- Random user data for testing
 INSERT INTO user (username, password, email, age, gender, height) VALUES
@@ -115,36 +123,12 @@ INSERT INTO exercise (user_id, exercise_date, exercise_name, exercise_type, sets
 
 
 
+-- Random Workout Routine Data for testing
+INSERT INTO exercise_routine (routine_name, routine_plan) VALUES
+    ('Chris Heria 100 Pushups', '1. Regular Pushups, 10 Reps\n2. Wide Pushups, 10 Reps\n3. Diamond Pushups, 10 Reps\n4. Explosive Pushups, 10 Reps\n5. Side-to-Side Pushups, 10 Reps\n6. Clapping Pushups, 10 Reps\n7. Archer Pushups, 10 Reps\n8. Open and Close Pushups, 10 Reps\n9. Typewriter Pushups\n10. Pushup + Shoulder Tap\nNotes: 3 or more sets.'),
+    ('Chris Heria 100 Pullups', '1. Pull-ups, 10 Reps\n2. Chin-ups, 10 Reps\n3. Switching one arm chin up hold, 10 Reps\n4. Close grip pull-ups, 10 Reps\n5. Close grip chin ups, 10 Reps\n6. Pull ups open & closed, 10 Reps\n7. Commando Pull-ups, 10 Reps\n8. Half Pull-ups, 10 Reps\nNotes: 3 or more sets.'),
+    ('Chris Heria Complete 20 Min Full Body Workout', '1. Renegade Rows, 45 Secs\n2. Wide Rows, 45 Secs\n3. Reverse Leg Raises, 45 Secs\n4. Staggered Romanian Deadlift, 45 Secs\n5. Goblet Squat Calf Raises, 45 Secs\n6. Thrusters, 45 Secs\n7. Rear Delt Flys with Skis, 45 Secs\n8. Pike Push Ups, 45 Secs\n9. Bench Dips, 45 Secs\n10. Push Ups, 45 Secs\n11. Elevated Diamond Squeeze Push Ups, 45 Secs\n12. Skull Crushers, 45 Secs\n13. Dumbell Kick Backs, 45 Secs\n14. Bicep + Hammer Curls, 45 Secs\n15. Russian Twist, 45 Secs\n16. Reach Ups, 45 Secs\n17. Mountain Climbers, 45 Secs\nNotes: 45 Sec workout, 15 Sec rest.');
 
 
 
--- INSERT INTO exercise (user_id, exercise_date, exercise_time, exercise_name, exercise_type, sets, reps, weight, duration) VALUES
--- -- 2023-01-01 (Leg Day)
--- (1, '2023-01-01', '08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
--- (1, '2023-01-01', '08:30:00', 'Squat', 'Weightlifting', 3, 10, 80, 30),
--- (1, '2023-01-01', '09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 100, 30),
 
--- -- 2023-01-04 (Chest Day)
--- (1, '2023-01-04', '08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 62.5, 30),
--- (1, '2023-01-04', '08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 30, 30),
--- (1, '2023-01-04', '09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 15, 30),
-
--- -- 2023-01-07 (Pull Day)
--- (1, '2023-01-07', '08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
--- (1, '2023-01-07', '08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 55, 30),
--- (1, '2023-01-07', '09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 50, 30),
-
--- -- 2023-01-11 (Chest Day)
--- (1, '2023-01-11', '08:00:00', 'Bench Press', 'Weightlifting', 3, 12, 65, 30),
--- (1, '2023-01-11', '08:30:00', 'Incline Dumbbell Press', 'Weightlifting', 3, 12, 32.5, 30),
--- (1, '2023-01-11', '09:00:00', 'Chest Fly', 'Weightlifting', 3, 12, 17.5, 30),
-
--- -- 2023-01-14 (Leg Day)
--- (1, '2023-01-14', '08:00:00', 'Bench Press', 'Weightlifting', 3, 10, 62.5, 30),
--- (1, '2023-01-14', '08:30:00', 'Squat', 'Weightlifting', 3, 10, 82.5, 30),
--- (1, '2023-01-14', '09:00:00', 'Deadlift', 'Weightlifting', 3, 10, 102.5, 30),
-
--- -- 2023-01-17 (Pull Day)
--- (1, '2023-01-17', '08:00:00', 'Pull-ups', 'Weightlifting', 3, 10, 0, 30),
--- (1, '2023-01-17', '08:30:00', 'Bent Over Rows', 'Weightlifting', 3, 10, 57.5, 30),
--- (1, '2023-01-17', '09:00:00', 'Lat Pulldowns', 'Weightlifting', 3, 10, 52.5, 30);

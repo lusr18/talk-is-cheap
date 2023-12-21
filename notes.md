@@ -35,7 +35,7 @@ llm=OpenAI(client=<openai.resources.completions.Completions object at 0x7f945da8
     async_client=<openai.resources.completions.AsyncCompletions object at 0x7f945daed790>, 
     temperature=0.0, 
     max_tokens=1000, 
-    openai_api_key='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', 
+    openai_api_key='<api_key>', 
     openai_proxy=''
 )
 ```
