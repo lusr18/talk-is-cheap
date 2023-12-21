@@ -4,9 +4,10 @@ from langchain.chat_models import ChatOpenAI
 # from langchain.vectorstores import vectorstore
 from langchain.chains import ConversationChain, ConversationalRetrievalChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
+from langchain.callbacks import get_openai_callback
 from utils import nav_to
 import os
-from huggingface.blip import blip_api
+from huggingface.hf_apis import image_to_caption
 
 import base64
 from pathlib import Path
@@ -30,20 +31,25 @@ def get_conversation_chain():
     llm = ChatOpenAI()
     memory = ConversationBufferMemory(memory_key="history")
     conversation_chain = ConversationChain(llm=llm, memory=memory)
-    print(conversation_chain.prompt)
     return conversation_chain
 
 def handle_userinput(user_question):
-    response = st.session_state.chatopenai_convo({'input': user_question})
-    print(response)
-    # st.session_state.chat_history = response['chat_history']
-    return response["response"]
+    try: 
+        # Track how much tokens are used and cost
+        with get_openai_callback() as cb:
+            response = st.session_state.chatopenai_convo({'input': user_question})
+        print(response)
+        print("tokens", cb)
+        response = response["response"]
+    except Exception as e:
+        response = "Error" + str(e)
+    return response
 
 
 def uploader_callback(a):
     print(a)
     
-
+    
 def main():
     st.set_page_config(page_title="Nutrition Page", page_icon="🍎", layout="wide")
     
@@ -58,25 +64,14 @@ def main():
     if "chatopenai_convo" not in st.session_state:
         st.session_state.chatopenai_convo = get_conversation_chain()
         
-        
     # Session state for image
-    # if "img_file_buffer" not in st.session_state:
+    if "image_source" not in st.session_state:
+        st.session_state.image_source = None
+        
+    # Session state for model type
+    if "model_type" not in st.session_state:
+        st.session_state.model_type = "OpenAI"
     
-                
-    st.session_state.img_file_buffer = st.file_uploader(
-        label="Label", type=['png', 'jpg'], label_visibility="collapsed", 
-        on_change=lambda prompt="prompt": st.session_state.nutrition_conv.append(
-            {
-                "role": "user", "content": "What is this?", "onload": st.session_state.img_file_buffer,
-            }
-        ) if st.session_state['file_uploader'] is not None else None,
-        key="file_uploader"
-    )
-     # if st.session_state.nutrition_conv[-1]["role"] != "user":
-    if st.session_state.img_file_buffer != None:
-        with open(os.path.join("temp",  st.session_state.img_file_buffer.name),"wb") as f:
-            f.write(st.session_state.img_file_buffer.getbuffer())
-
     # Display chat messages
     for idx, message in enumerate(st.session_state.nutrition_conv):
         with st.chat_message(message["role"]):
@@ -92,52 +87,66 @@ def main():
             
     # Generate a new response if the last message is not from the assistant
     if st.session_state.nutrition_conv[-1]["role"] != "assistant":
-        print(st.session_state.nutrition_conv[-1])
-        image_path = "./" + os.path.join("temp",  st.session_state.img_file_buffer.name)
-        print(image_path)
-        print("Exists: ", os.path.exists(image_path))
-        print("Listdir: ", os.listdir("./temp"))
-        if st.session_state.nutrition_conv[-1]["content"] == "What is this?" and st.session_state.img_file_buffer != None:
-            if os.path.exists(image_path):
-                with st.chat_message("assistant"):
-                    with st.spinner("Analyzing image..."):
-                        # TODO Make a call to ...
-                        image_path = os.path.join("temp",  st.session_state.img_file_buffer.name)
-                        # response = "Image analysis complete"
-                        response = blip_api(image_path)
-                        
-                        with st.container():
-                            st.write("Image analysis complete: " + response)
-                            st.image(st.session_state.img_file_buffer, width=300)
-                            
-                st.session_state.nutrition_conv.append({'role': 'assistant', 
-                    'content': "Image analysis complete:" + response, 
-                    'image':  st.session_state.img_file_buffer, 
-                    'image_link': os.path.join("temp",  st.session_state.img_file_buffer.name)
-                })
-                # st.session_state.nutrition_conv.append({'role': 'assistant', 'content': response})
-                # st.session_state.img_file_buffer = None
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                # TODO Make a call to ...
+                response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
+                # response = "Echo response"
+                placeholder = st.empty()
+                placeholder.markdown(response)
             
-        else:
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    # TODO Make a call to ...
-                    # response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
-                    response = "Echo response"
-                    placeholder = st.empty()
-                    placeholder.markdown(response)
-                
-            st.session_state.nutrition_conv.append({'role': 'assistant', 'content': response})
+        st.session_state.nutrition_conv.append({'role': 'assistant', 'content': response})
     
-   
+    # Sidedbar
+    with st.sidebar.expander("➕ &nbsp; Image Media Uploader", expanded=False):
+        # Upload image
+        input_file = None
+        input_file = st.file_uploader(
+            "Upload a single image",
+            type=["jpg", "png"],
+            accept_multiple_files=False
+        )
         
-           
+        add_media = st.button(label="Upload!", key="upload_image")
+        
+        if add_media:
+            if input_file:
+                # Save image to path
+                dest_path = "temp/" + input_file.name
+                # Write to path
+                with open(dest_path, "wb") as f:
+                    f.write(input_file.getvalue())
+                    
+                st.session_state.image_source = input_file
+                
+    # Add response to chat
+    if add_media:
+        print("Sumbit image...")
+        if st.session_state.image_source == None:
+            print("No image file...")
+            st.warning("No uploaded audio files...", icon="⚠️")
+        else:
+            st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+            print("Image to text...")
+            with st.chat_message("user"):
+                with st.container():
+                    st.write("What is this image?")
+                    st.image(st.session_state.image_source, width=300)
+                
+                st.session_state.nutrition_conv.append({
+                    "role": "user", 
+                    "content": "What is this?",
+                    "image": st.session_state.image_source,
+                    "image_link": "temp/" + st.session_state.image_source.name
+                })
+            with st.chat_message("assistant"):
+                with st.spinner("Analyzing image..."):
+                    image_path = os.path.join("temp",  st.session_state.image_source.name)
+                    response = image_to_caption(image_path)
+                    st.write("This image is a " + response)
 
-    
+            st.session_state.nutrition_conv.append({'role': 'assistant', 'content': "This is an image of" + response})
+        st.experimental_rerun()
+
 if __name__ == "__main__":
-    # if "authentication_status" not in st.session_state or st.session_state["authentication_status"] is None:
-    #     print("Redirecting to login page")
-    #     nav_to(st, "/")
-    # else:
-
     main()

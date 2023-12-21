@@ -86,9 +86,17 @@ def main():
         
         # List of PDFs on sidebar
         st.subheader("List of PDFs")
-        pdfs = get_pdfs() 
-        for pdf in pdfs:
-            st.write(pdf)
+        # pdfs = get_pdfs() 
+        # for pdf in pdfs:
+        #     st.write(pdf)
+            
+            
+        st.subheader("🔐 OpenAI API KEY")
+        st.text_input("OpenAI API KEY", 
+                      value=os.getenv("OPENAI_API_KEY"),
+                      type="password", 
+                      label_visibility="collapsed"
+                    )
             
         # st.subheader("Pages")
         # page = st.radio("Select a page", list(pages.keys()))
@@ -119,6 +127,8 @@ def main():
     #     pages[page]()
     # elif page == "Track Workout":
     #     pages[page]()
+    
+
         
         
 def login_form():

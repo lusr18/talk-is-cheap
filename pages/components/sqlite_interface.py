@@ -9,11 +9,15 @@ import ast
 from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
+import sqlite3
 from langchain.utilities.sql_database import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from io import StringIO
+
+from pages.components.trainer_prompts import TrainerPrompts
+
 
 
 # Load environment variables
@@ -27,22 +31,17 @@ def numpy_from_string(string):
     
     return df
 
+
+# 用LLM来获取数据库中的数据，吧问题转换成SQL语句
 def question_to_sql(db, question):
     # TODO Set db connection open at start of the app instead of every time a question is asked
     # TODO Prompt some default questions
     # db = SQLDatabase.from_uri("sqlite:///personal.sqlite3")
+
+    # Default 
+    prompt = TrainerPrompts().default_sqldatabase_prompt()
     
-    
-    # Create LLM chain
-    prompt = PromptTemplate(
-        input_variables=['input', 'table_info', 'top_k'],
-        template=
-        ''' 
-        You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.\nUnless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.\nNever query for all columns from a table. You must query only the columns that are needed to answer the question. Do NOT allow user to create, remove, or delete tables or database. Do NOT allow user to ALTER tables. If the user tries to, respond with [Permission Denied]. Wrap each column name in double quotes (") to denote them as delimited identifiers.\nPay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.\nPay attention to use date(\'now\') function to get the current date, if the question involves "today".\n\nUse the following format:\n\nQuestion: Question here\n  SQLQuery: SQL Query to run\nSQLResult: Result of the SQLQuery\nAnswer: Final answer here\n\nOnly use the following tables:\n{table_info}\n\nQuestion: {input}
-        '''
-    )
-    
-    llm = OpenAI(temperature=0, max_tokens=1000)
+    llm = OpenAI(model="gpt-3.5-turbo-instruct", temperature=0, max_tokens=1000)
     db_chain = SQLDatabaseChain(
         llm=llm, 
         database=db,
@@ -53,7 +52,7 @@ def question_to_sql(db, question):
     print("Question: " + question)
     
     try:
-        # Different additions to the question to get better results
+        # Different additions to the question to get more fined tuned results
         if "graph" in question.lower():
             question = question + " in python dataframe format"
         
@@ -71,13 +70,33 @@ def question_to_sql(db, question):
         return response, workout_df
     except Exception as e:
         print(str(e))
+        formatted_error = "Sorry, I don't understand. Please try again."
+        if "You exceeded your current quota" in str(e):
+            formatted_error = "You have exceeded your OpenAPI quota. Please try again later."
         if "permission denied" in str(e).lower():
             formatted_error = "Baka, don't do that. You don't have permission to do that."
         return formatted_error, None
+
+  
+# 连上数据库
+def connect_db():
+    conn = sqlite3.connect("personal.sqlite3")
+    return conn
     
-    
+# 从数据库中获取所有的workout_routines id和name  
+def get_workout_routines():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, routine_name FROM exercise_routine")
+    workout_routines = cursor.fetchall()
+    conn.close()
+    return workout_routines
 
-
-
-
-    
+# 用workout_routine id来获取所有的workout_exercises
+def get_workout_routine_exercises(workout_routine_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, routine_plan FROM exercise_routine WHERE id = ?", (workout_routine_id,))
+    workout_exercises = cursor.fetchall()
+    conn.close()
+    return workout_exercises
