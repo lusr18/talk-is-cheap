@@ -157,13 +157,13 @@ def main():
         if next_button:
             st.session_state.selected_date = st.session_state.next_workout_date
             st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
-            st.experimental_rerun()
+            st.rerun()
             
     
         if previous_button:
             st.session_state.selected_date = st.session_state.previous_workout_date
             st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
-            st.experimental_rerun()
+            st.rerun()
 
         selected = pills("Workout Type", ["All", "Bench Press", "Squat", "Deadlift"], ["👻","🍀", "🎈", "🌈"])
         

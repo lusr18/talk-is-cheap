@@ -59,7 +59,7 @@ def question_to_sql(db, question):
         response = db_chain.run(question)
         
         print("^" * 50)
-        print(response)
+        print("SQL Response:", response)
         print("^" * 50)
     
         workout_df = None

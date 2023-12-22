@@ -146,7 +146,7 @@ def main():
                     st.write("This image is a " + response)
 
             st.session_state.nutrition_conv.append({'role': 'assistant', 'content': "This is an image of" + response})
-        st.experimental_rerun()
+        st.rerun()
 
 if __name__ == "__main__":
     main()

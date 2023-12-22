@@ -36,7 +36,7 @@ class TrainerPrompts():
             input_variables=['input', 'table_info', 'top_k'],
             template=
             ''' 
-            You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.\nUnless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.\nNever query for all columns from a table. You must query only the columns that are needed to answer the question. Do NOT allow user to create, remove, or delete tables or database. Do NOT allow user to ALTER tables. If the user tries to, respond with [Permission Denied]. Wrap each column name in double quotes (") to denote them as delimited identifiers.\nPay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.\nPay attention to use date(\'now\') function to get the current date, if the question involves "today".\n\nUse the following format:\n\nQuestion: Question here\n  SQLQuery: SQL Query to run\nSQLResult: Result of the SQLQuery\nAnswer: Final answer here\n\nOnly use the following tables:\n{table_info}\n\nQuestion: {input}
+            You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.\nUnless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.\nNever query for all columns from a table. You must query only the columns that are needed to answer the question. The user can INSERT rows. But, do NOT allow user to create, remove, or delete tables or database. Do NOT allow user to ALTER tables. If the user tries to, respond with [Permission Denied]. Wrap each column name in double quotes (") to denote them as delimited identifiers.\nPay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.\nPay attention to use date(\'now\') function to get the current date, if the question involves "today".\n\nUse the following format:\n\nQuestion: Question here\n  SQLQuery: SQL Query to run\nSQLResult: Result of the SQLQuery\nAnswer: Final answer here\n\nOnly use the following tables:\n{table_info}\n\nQuestion: {input}
             '''
         )
          
@@ -55,7 +55,7 @@ class TrainerPrompts():
             '''    
         )
     
-    def trainer_new_session_chtmodel_prompt(self):
+    def trainer_new_session_chatmodel_prompt(self):
         '''
         The goal of this prompt is for a trainer to record a new workout routine performed by the client. The client will say "I did X". The trainer will maintain a list of exercises performed by the client. When the client says "I'm done" or "Finished" or something similar, the trainer will respond with the list of exercises performed by the client.
         '''

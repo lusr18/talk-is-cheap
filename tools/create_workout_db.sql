@@ -41,7 +41,7 @@ CREATE TABLE food (
     id             INTEGER  PRIMARY KEY,
     user_id        INT,
     food_name      VARCHAR(50) NOT NULL,
-    food_date      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    food_date      DATE NOT NULL DEFAULT CURRENT_DATE,
     calories       INT DEFAULT(0),
     carbohydrates  INT DEFAULT(0),    -- grams
     fat            INT DEFAULT(0),    -- grams
