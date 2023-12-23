@@ -15,6 +15,10 @@ port        = os.getenv("SERVER_PORT")
 username    = os.getenv("FUDAN_USERNAME")
 password    = os.getenv("FUDAN_PASSWORD")
 
+print(f"Using proxy: {username}")
+print(f"Using proxy: {password}")
+
+
 
 url = f'http://{ip_address}:{port}/'
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
@@ -58,8 +62,8 @@ def send_llama27b_request(data, instruction, system_prompt):
     print(f"Sending request to the {url}")
     try:
         # Sending the POST request
-        response = requests.post(url, data=formatted_data, proxies=proxies)
-
+        response = requests.post(url, data=formatted_data, proxies=proxies, headers=headers, timeout=5)
+        
         # Printing the response
         print("Response from the server:")
         
@@ -72,6 +76,7 @@ def send_llama27b_request(data, instruction, system_prompt):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        return "An error occurred", 0
         
 # send_request(data)
 

@@ -15,9 +15,13 @@ conda env create -f environment.yml
 
 ## running
 1. Create local databases
-```
-cd tools
-python create_db_script.py --sql_script create_workout_db.sql --database_path ../personal.sqlite3
+```bash
+# Create personal db
+cd database
+python create_db_script.py --sql_script create_personal_db.sql --database_path personal_db.sqlite3
+
+# Create nutrients database
+python create_db_script.py --sql_script create_nutrition_db.sql --database_path nutrient_db.sqlite3
 ```
 
 2. Run app.py with streamlit
