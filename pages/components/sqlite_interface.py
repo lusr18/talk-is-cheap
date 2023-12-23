@@ -79,13 +79,13 @@ def question_to_sql(db, question):
 
   
 # 连上数据库
-def connect_db():
-    conn = sqlite3.connect("personal.sqlite3")
+def connect_db(db_name="personal_db.sqlite3"):
+    conn = sqlite3.connect(db_name)
     return conn
     
 # 从数据库中获取所有的workout_routines id和name  
-def get_workout_routines():
-    conn = connect_db()
+def get_workout_routines(db_name="personal_db.sqlite3"):
+    conn = connect_db(db_name)
     cursor = conn.cursor()
     cursor.execute("SELECT id, routine_name FROM exercise_routine")
     workout_routines = cursor.fetchall()
@@ -93,10 +93,21 @@ def get_workout_routines():
     return workout_routines
 
 # 用workout_routine id来获取所有的workout_exercises
-def get_workout_routine_exercises(workout_routine_id):
-    conn = connect_db()
+def get_workout_routine_exercises(db_name="personal_db.sqlite3", workout_routine_id=0):
+    conn = connect_db(db_name)
     cursor = conn.cursor()
     cursor.execute("SELECT id, routine_plan FROM exercise_routine WHERE id = ?", (workout_routine_id,))
     workout_exercises = cursor.fetchall()
     conn.close()
+    
+    #Regular Pushups, 10 Reps\n2. Wide Pushups, 10 Reps\n3. Diamond Pushups, 10 Reps\n4. Explosive Pushups, 10 Reps\n5. Side-to-Side Pushups, 10 Reps\n6. Clapping Pushups, 10 Reps\n7. Archer Pushups, 10 Reps\n8. Open and Close Pushups, 10 Reps\n9. Typewriter Pushups\n10. Pushup + Shoulder Tap\nNotes: 3 or more sets.
+    
+    # Workout looks like this
+    #Regular Pushups, 10 Reps\n2. Wide Pushups, 10 Reps\n3. Diamond Pushups, 10 Reps\n4. Explosive Pushups, 10 Reps\n5. Side-to-Side Pushups, 10 Reps\n6. Clapping Pushups, 10 Reps\n7. Archer Pushups, 10 Reps\n8. Open and Close Pushups, 10 Reps\n9. Typewriter Pushups\n10. Pushup + Shoulder Tap\nNotes: 3 or more sets.
+    
+    # Make it into a list string
+    workout_exercises = workout_exercises[0][1].split("\\n")
+    print(workout_exercises)
+    
+    workout_exercises = ("\n").join(workout_exercises)
     return workout_exercises
