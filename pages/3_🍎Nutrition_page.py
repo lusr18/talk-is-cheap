@@ -59,7 +59,7 @@ def handle_userinput(user_question):
 
 def clear_conversation():
     """ Reset conversation, reset AssistantAgent """
-    st.session_state.nutrition_conv = [{"role": "assistant", "content": "Ask me about nutrition? Or upload an image for food analysis"}]
+    st.session_state.nutrition_conv = [{"role": "assistant", "content": "I am your nutrition assistant. Ask me about yourself, nutrient information, your food data, and more!"}]
     
     # Reset AssistantAgent
     
@@ -80,7 +80,7 @@ def main():
     
     # Session state to store the conversation
     if 'nutrition_conv' not in st.session_state:
-        st.session_state.nutrition_conv = [{"role": "assistant", "content": "Ask me about nutrition? Or upload an image for food analysis"}]
+        st.session_state.nutrition_conv = [{"role": "assistant", "content": "I am your nutrition assistant. Ask me about yourself, nutrient information, your food data, and more!"}]
     
     # Create conversation chain
     if "chatopenai_convo" not in st.session_state:

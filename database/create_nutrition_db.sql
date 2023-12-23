@@ -7,7 +7,7 @@ CREATE TABLE user (
     password       VARCHAR(255) NOT NULL,
     email          VARCHAR(255) NOT NULL,
     age            INT NOT NULL,
-    gender         INT NOT NULL,            -- 0 male, 1 female, 2 other
+    gender         VARCHAR(255) NOT NULL,   -- male, female            
     height_cm      INT NOT NULL,             -- cm
     weight_kg      DECIMAL(5,2) NOT NULL    -- kg
 );
@@ -41,7 +41,7 @@ CREATE TABLE personal_tracker (
 
 -- Random user data for testing
 INSERT INTO user (username, password, email, age, gender, height_cm, weight_kg) VALUES
-    ('testuser1', 'password', 'testuser1@email.com', 25, 1, 180, 70);
+    ('testuser1', 'password', 'testuser1@email.com', 25, 'male', 180, 70);
 
 -- Random personal tracker data for testing
 INSERT INTO personal_tracker (user_id, record_date, height_cm, weight_kg, body_fat) VALUES

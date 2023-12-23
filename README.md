@@ -9,8 +9,8 @@ HUGGINGFACEHUB_API_TOKEN=<HUGGINGFACEHUB_API_TOKEN>
 ```
 
 2. conda environment
-```
-conda env create -f environment.yml
+```bash
+conda env create -f linux_environment.yml
 ```
 
 ## running
@@ -21,11 +21,11 @@ cd database
 python create_db_script.py --sql_script create_personal_db.sql --database_path personal_db.sqlite3
 
 # Create nutrients database
-python create_db_script.py --sql_script create_nutrition_db.sql --database_path nutrient_db.sqlite3
+python create_db_script.py --sql_script create_nutrition_db.sql --database_path nutrition_db.sqlite3
 ```
 
 2. Run app.py with streamlit
-```
+```bash
 streamlit run app.py
 ```
 

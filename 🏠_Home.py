@@ -17,10 +17,14 @@ from templates import user_template, bot_template, css
 from langchain.utilities.sql_database import SQLDatabase
 
 
-# Load environment variables
+# Load environmental variables for whole app
 load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+os.environ["NINJA_API_KEY"] = os.getenv("NINJA_API_KEY")
+os.environ["MILVUS_HOST"] = os.getenv("MILVUS_HOST")
+os.environ["MILVUS_TOKEN"] = os.getenv("MILVUS_TOKEN")
+os.environ["OPENAI_DEFAULT_MODEL"] = os.getenv("OPENAI_DEFAULT_MODEL")
 
 # Set page config
 st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")

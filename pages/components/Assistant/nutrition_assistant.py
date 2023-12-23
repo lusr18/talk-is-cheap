@@ -118,16 +118,57 @@ class GetPersonBMI(Function):
     def function(self, height, weight):
         bmi = weight / (height ** 2)
         return "The BMI of the person is {:.2f}".format(bmi)
+    
+class GetPersonBMR(Function):
+    def __init__(self):
+        super().__init__(
+            name="get_bmr",
+            description="Basal Metabolic Rate (BMR) of a person using their weight, height, age, gender using the Mifflin-St Jeor equation",
+            parameters = [
+                Property(
+                    name="height",
+                    description="The height of the person in meters",
+                    type="number",
+                    required=True,
+                ),
+                Property(
+                    name="weight",
+                    description="The weight of the person in kilograms",
+                    type="number",
+                    required=True,
+                ),
+                Property(
+                    name="age",
+                    description="The age of the person in years",
+                    type="number",
+                    required=True,
+                ),
+                Property(
+                    name="gender",
+                    description="The gender of a person, male or female",
+                    type="string",
+                    required=True,
+                ),
+            ]
+        ),
+    def function(self, height, weight, age, gender):
+        if gender.lower() == 'male':
+            return (10 * weight) + (6.25 * height) - (5 * age) + 5
+        else:  # 'female'
+            return (10 * weight) + (6.25 * height) - (5 * age) - 161
+        
+            
+            
 
 def create_nutrition_agent() -> AIAssistant:
     """ Create a nutrition assistant agent """
     
-    instruction = """You are a Nutrition experts. User asks you questions about the nutrition database.
+    instruction = """You are a Nutrition experts. User asks you questions about the nutrition database which contains user, food, and personal tracking.
     First obtain the schema of the database to check the tables and columns, then generate SQL queries to answer the questions.
     The user can also query nutrition information for a food.
-    If the user asks for the BMI of a person, you can calculate it using the height and weight of the person. But first get the weight and height of the person from the database."""
+    The user can also ask about the BMI and BMR of a person. But before calculating, get information from the nutrition database."""
     
-    functions = [GetDBSchema(), RunSQLQuery(), GetNutritionInfo(), GetPersonBMI()]
+    functions = [GetDBSchema(), RunSQLQuery(), GetNutritionInfo(), GetPersonBMI(), GetPersonBMR()]
     
     assistant = AIAssistant(
         instruction=instruction,
