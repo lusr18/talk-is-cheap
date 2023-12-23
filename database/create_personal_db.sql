@@ -8,7 +8,7 @@ CREATE TABLE user (
     password       VARCHAR(255) NOT NULL,
     email          VARCHAR(255) NOT NULL,
     age            INT NOT NULL,
-    gender         INT NOT NULL,            -- 0 male, 1 female, 2 other
+    gender         VARCHAR(255) NOT NULL,   -- male, female            
     height_cm      INT NOT NULL,             -- cm
     weight_kg      DECIMAL(5,2) NOT NULL    -- kg
 );
@@ -23,8 +23,8 @@ CREATE TABLE exercise (
     exercise_type   VARCHAR(50) NOT NULL,
     sets            INT DEFAULT(0),
     reps            INT DEFAULT(0),
-    weight          DECIMAL(5,2) DEFAULT(0), -- Weight in kg
-    duration        DECIMAL(5,2) DEFAULT(0), -- Duration in minutes
+    weight_kg       DECIMAL(5,2) DEFAULT(0), -- Weight in kg
+    duration_s      INT DEFAULT(0), -- Duration in seconds
     notes           VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
@@ -67,7 +67,7 @@ CREATE TABLE personal_tracker (
 
 -- Random user data for testing
 INSERT INTO user (username, password, email, age, gender, height_cm, weight_kg) VALUES
-    ('testuser1', 'password', 'testuser1@email.com', 25, 1, 180, 70);
+    ('testuser1', 'password', 'testuser1@email.com', 25, 'male', 180, 70);
 
 -- Random personal tracker data for testing
 INSERT INTO personal_tracker (user_id, record_date, height_cm, weight_kg, body_fat) VALUES
@@ -92,7 +92,7 @@ INSERT INTO food (user_id, food_name, calories_kcal, carbohydrates_g, fat_g, pro
     (1, 'Bowl of Oatmeal', 158, 27, 3.2, 5.5, 7, 1);
 
 -- -- Random workout data for testing
-INSERT INTO exercise (user_id, exercise_date, exercise_name, exercise_type, sets, reps, weight, duration) VALUES
+INSERT INTO exercise (user_id, exercise_date, exercise_name, exercise_type, sets, reps, weight_kg, duration_s) VALUES
 -- 2023-01-01 (Leg Day)
 (1, '2023-01-01', 'Bench Press', 'Weightlifting', 3, 10, 60, 30),
 (1, '2023-01-01', 'Squat', 'Weightlifting', 3, 10, 80, 30),

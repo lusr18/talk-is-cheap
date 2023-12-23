@@ -9,33 +9,35 @@ import sqlite3
 import datetime
 
 
-dashboard_pages = ["Workout", "Nutrition", "Personal Tracker", "Knowledge"]
+dashboard_pages = ["Workout", "Nutrition", "Personal Tracker"]
 popular_exercises = ["Bench Press", "Squat", "Deadlift"]
 
 
-def connect_db():
-    conn = sqlite3.connect("personal.sqlite3")
+def connect_db(database_name):
+    conn = sqlite3.connect(database_name)
     return conn
 
-def get_list_of_dates():
+def get_list_of_dates(table_name="exercise"):
     # Get workout data
-    conn = connect_db()
-    workout_df = pd.read_sql_query("SELECT * FROM exercise", conn)
+    conn = connect_db("./database/personal_db.sqlite3" if table_name == "exercise" else "./database/nutrition_db.sqlite3")
+    workout_df = pd.read_sql_query(f"SELECT * FROM {table_name}", conn)
     
     # Get list of dates
-    workout_df["exercise_date"] = pd.to_datetime(workout_df["exercise_date"]).dt.date
-    list_of_dates = workout_df["exercise_date"].unique()
+    workout_df[f"{table_name}_date"] = pd.to_datetime(workout_df[f"{table_name}_date"]).dt.date
+    list_of_dates = workout_df[f"{table_name}_date"].unique()
     
     return list_of_dates
 
 def create_workout_dashboard(workout_config, date_picker):
     # Get workout data
-    conn = connect_db()
+    conn = connect_db("./database/personal_db.sqlite3")
     workout_df = pd.read_sql_query("SELECT * FROM exercise", conn)
     
     # Filter workouts based on exercise date
     workout_df["exercise_date"] = pd.to_datetime(workout_df["exercise_date"]).dt.date
     filtered_workouts_df = workout_df[workout_df["exercise_date"] == date_picker]
+    
+    filtered_workouts_df = filtered_workouts_df[["id", "exercise_name", "exercise_date", "exercise_type", "sets", "reps", "weight_kg", "notes"]].copy()
     
     # Get entry rows where exercise is in popular_exercises
     if workout_config[0] == "All":
@@ -45,26 +47,29 @@ def create_workout_dashboard(workout_config, date_picker):
 
     return popular_workouts_df
 
-def create_nutrition_dashboard():
+def create_nutrition_dashboard(date_picker):
     # Get nutrition data
-    conn = connect_db()
+    conn = connect_db("./database/nutrition_db.sqlite3")
     nutrition_df = pd.read_sql_query("SELECT * FROM food", conn)
     
-    # Barchart of calories per day, grouped by date, sum of calories, and reset index so date is a column
-    # Time is x axis, calories is y axis,
-    calories_df = nutrition_df[["food_date", "calories_kcal"]].copy()
-    calories_df["food_date"] = pd.to_datetime(calories_df["food_date"])
-    # Remove the time from the date
-    calories_df["food_date"] = calories_df["food_date"].dt.date
+    # Filter nutrition based on food date
+    nutrition_df["food_date"] = pd.to_datetime(nutrition_df["food_date"]).dt.date
+    filtered_nutrition_df = nutrition_df[nutrition_df["food_date"] == date_picker]
     
+    # Return only certain columns
+    filtered_nutrition_df = filtered_nutrition_df[["id", "food_name", "food_date", "calories_kcal", "carbohydrates_g", "fat_g", "protein_g", "sodium_mg", "sugar_g", "notes"]].copy()
+    
+    calories_df = filtered_nutrition_df[["food_date", "calories_kcal"]].copy()    
     calories_df = calories_df.groupby("food_date").sum().reset_index()
     calories_df.set_index("food_date", inplace=True)
     
-    return nutrition_df, calories_df
+    conn.close()
+    
+    return filtered_nutrition_df, calories_df
 
 def create_personal_tracker_dashboard():
     # Get personal tracker data
-    conn = connect_db()
+    conn = connect_db("./database/personal_db.sqlite3")
     personal_tracker_df = pd.read_sql_query("SELECT * FROM personal_tracker", conn)
     
     # Get date from record_date, and weight from weight
@@ -78,21 +83,25 @@ def create_personal_tracker_dashboard():
     body_fat_df["record_date"] = pd.to_datetime(body_fat_df["record_date"])
     body_fat_df = body_fat_df.set_index("record_date")
     
+    # Disconnect from database
+    conn.close()
+    
     return weight_tracker_df, body_fat_df
 
 # 获取用户personal_tracker表中的数据
 def get_personal_tracker_data():
-    conn = connect_db()
+    conn = connect_db("./database/personal_db.sqlite3")
     personal_tracker_df = pd.read_sql_query("SELECT * FROM personal_tracker", conn)
     return personal_tracker_df
 
 
-def get_previous_after_date(date_picker):
+def get_previous_after_date(date_picker, table_name):
     # Calculate previous and next dates based on list of dates
-    list_of_dates = get_list_of_dates()
-    # print(list_of_dates)
-    print(date_picker)
-  
+    list_of_dates = get_list_of_dates(table_name)
+    
+    # print("Table name", table_name)
+    # print("List of dates", list_of_dates)
+      
     # Find the next date with a workout
     next_date = None
     for date in list_of_dates:
@@ -117,6 +126,8 @@ def main():
     st.title("📈 Dashboard")
     
     # TODO Use st.data_editor to edit the database
+    st.subheader('Select the dashboard page')
+    job_filter = st.selectbox("Select the dashboard page", dashboard_pages, label_visibility="collapsed")
     
     if "selected_date" not in st.session_state:
         st.session_state.selected_date = datetime.date.today()
@@ -124,17 +135,13 @@ def main():
         
         st.session_state.next_workout_date = None
         st.session_state.previous_workout_date = None
-        
-        st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
-        
     
-    job_filter = st.selectbox("Select the dashboard page", dashboard_pages)
-    
-    
-        
-        
-    ###################################
-    if job_filter == "Workout":
+    if job_filter == "Workout" or job_filter == "Nutrition":
+        print("Job filter is", job_filter)
+        st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date, table_name="exercise" if job_filter == "Workout" else "food")
+            
+        st.write("Workout Date")
+            
         # Three columns with middle one being wider
         col1, col2, col3 = st.columns([1, 4, 1], gap="small")
         
@@ -146,47 +153,125 @@ def main():
             
         with col3:
             next_button = st.button("NEXT", key="next_button", disabled=st.session_state.next_workout_date is None, use_container_width=True)
-            
         
         if date_picker != st.session_state.selected_date:
             print("Picked a new date")
             st.session_state.selected_date = date_picker
-            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
+            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date, table_name="exercise" if job_filter == "Workout" else "food")
         
     
         if next_button:
             st.session_state.selected_date = st.session_state.next_workout_date
-            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
+            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date, table_name="exercise" if job_filter == "Workout" else "food")
             st.rerun()
             
     
         if previous_button:
             st.session_state.selected_date = st.session_state.previous_workout_date
-            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date)
+            st.session_state.next_workout_date, st.session_state.previous_workout_date = get_previous_after_date(st.session_state.selected_date, table_name="exercise" if job_filter == "Workout" else "food")
             st.rerun()
 
+    
+    ###################################
+    if job_filter == "Workout":
+        # Add new exercise
+        st.write("Add New Exercise")
+        
+        col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1, 1], gap="small")
+        
+        with col1:
+            exercise_name = st.text_input("Exercise Name")
+        with col2:
+            exercise_date = st.date_input("Exercise Date", value=st.session_state.selected_date,)
+        with col3:
+            exercise_type = st.selectbox("Exercise Type", ["Weightlifting", "Calisthenics", "Cardio"])
+        with col4:
+            sets = st.number_input("Sets", min_value=0, max_value=100, value=0)
+        with col5:
+            reps = st.number_input("Reps", min_value=0, max_value=100, value=0)
+        with col6:
+            weight_kg = st.number_input("Weight (kg)", min_value=0, max_value=1000, value=0)
+        
+        notes = st.text_area("Notes")
+            
+        add_button = st.button("Add", key="add_button")
+        if add_button:
+            conn = connect_db("./database/personal_db.sqlite3")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO exercise (exercise_name, exercise_date, exercise_type, sets, reps, weight_kg, notes) VALUES (?, ?, ?, ?, ?, ?, ?)", (exercise_name, exercise_date, exercise_type, sets, reps, weight_kg, notes))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            st.success("Added!")
+            st.balloons()
+
+        
         selected = pills("Workout Type", ["All", "Bench Press", "Squat", "Deadlift"], ["👻","🍀", "🎈", "🌈"])
         
         pop_work_df = create_workout_dashboard([selected], st.session_state.selected_date)
-        st.table(pop_work_df)
+                             
+        edited_df = st.data_editor(
+            pop_work_df,
+            disabled=["id"],
+            hide_index=False,
+        )
+        
+        save_button = st.button("Save", key="save_button")
+        if save_button:
+            conn = connect_db("./database/personal_db.sqlite3")
+            cursor = conn.cursor()
+            for index, row in edited_df.iterrows():
+                # cursor.execute("UPDATE exercise SET exercise_name = %s, exercise_date = %s, exercise_type = %s, sets = %s, reps = %s, weight_kg = %s, notes = %s WHERE id = %s", (row['exercise_name'], row['exercise_date'], row['exercise_type'], row['sets'], row['reps'], row['weight_kg'], row['notes'], row['id']))
+                cursor.execute("UPDATE exercise SET exercise_name = ?, exercise_date = ?, exercise_type = ?, sets = ?, reps = ?, weight_kg = ?, notes = ? WHERE id = ?", (row['exercise_name'], row['exercise_date'], row['exercise_type'], row['sets'], row['reps'], row['weight_kg'], row['notes'], row['id']))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+            st.success("Saved!")
+            st.balloons()
+        
         # Create 
         
     if job_filter == "Nutrition":
-        nut_df, cal_df = create_nutrition_dashboard()
+        selected_2 = pills("Time", ["Daily", "Weekly", "Monthly"], ["👻","🍀", "🎈"])
+        nut_df, cal_df = create_nutrition_dashboard(st.session_state.selected_date)
+        
         st.write("Nutrition")
-        st.table(nut_df)
+        # st.table(nut_df)
+        
+        edited_df = st.data_editor(
+            nut_df,
+            disabled=["id"],
+            hide_index=True
+        )
+
+        save_button = st.button("Save", key="save_button")
+        if save_button:
+            conn = connect_db("./database/nutrition_db.sqlite3")
+            cursor = conn.cursor()
+            for index, row in edited_df.iterrows():
+                # cursor.execute("UPDATE exercise SET exercise_name = %s, exercise_date = %s, exercise_type = %s, sets = %s, reps = %s, weight_kg = %s, notes = %s WHERE id = %s", (row['exercise_name'], row['exercise_date'], row['exercise_type'], row['sets'], row['reps'], row['weight_kg'], row['notes'], row['id']))
+                cursor.execute("UPDATE exercise SET exercise_name = ?, exercise_date = ?, exercise_type = ?, sets = ?, reps = ?, weight_kg = ?, notes = ? WHERE id = ?", (row['exercise_name'], row['exercise_date'], row['exercise_type'], row['sets'], row['reps'], row['weight_kg'], row['notes'], row['id']))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+            st.success("Saved!")
+            st.balloons()
+        
+        
         
         # Barchart of calories per day
         st.write("Calories per day")
-        st.bar_chart(cal_df)
+        st.bar_chart(cal_df, y="calories_kcal")
         
     if job_filter == "Personal Tracker":
         weight_df, bf_df = create_personal_tracker_dashboard()
         st.write("Tracking Personal Weight Over Time")
-        st.line_chart(weight_df)
+        st.line_chart(weight_df, y="weight_kg")
         
         st.write("Tracking Personal Body Fat Over Time")
-        st.line_chart(bf_df)
+        st.line_chart(bf_df, y="body_fat")
 
 if __name__ == "__main__":
     main()
