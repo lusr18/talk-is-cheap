@@ -48,7 +48,6 @@ def question_to_sql(db, question):
         prompt=prompt,
         verbose=False
     )
-
     print("Question: " + question)
     
     try:

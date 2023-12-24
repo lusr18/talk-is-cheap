@@ -57,9 +57,10 @@ def get_vectorstore(vector_store_name):
             connection_args = {
                 # 'host': 'localhost',
                 # 'port': '19530'
+                # 'token': os.getenv("MILVUS_TOKEN"),
                 'collection_name': 'LangChainCollection',
-                'uri' : os.getenv("MILVUS_HOST"),
-                'token': os.getenv("MILVUS_TOKEN")
+                'uri' : os.getenv("MILVUS_HOST2"),
+                'token': os.getenv('MILVUS_HOST2_AUTH')
             }
         )
     elif vector_store_name == "Chroma":

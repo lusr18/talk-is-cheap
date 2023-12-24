@@ -4,25 +4,28 @@ import streamlit as st
 import base64
 from pathlib import Path
 from audiorecorder import audiorecorder
+# from audio_recorder_streamlit import audio_recorder
 # from playsound import playsound
-import pyaudio
-import wave
-import sys
+# import pyaudio
+# import wave
+# import sys
+from io import BytesIO
+from gtts import gTTS, gTTSError
+import pygame
 
 # Langchain
 from langchain.llms.openai import OpenAI
 from langchain.chat_models import ChatOpenAI
-# from langchain.vectorstores import vectorstore
-from langchain.chains import ConversationChain, ConversationalRetrievalChain
+from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.callbacks import get_openai_callback
-from utils import nav_to
 
 # Custom
 from pages.components.trainer_prompts import TrainerPrompts
 from pages.components.llama27b_interface import send_llama27b_request
 from huggingface.hf_apis import image_to_caption
 from huggingface.distil_small import speech_to_text
+from utils import en
 
 def img_to_bytes(img_path):
     img_bytes = Path(img_path).read_bytes()
@@ -61,6 +64,27 @@ def handle_userinput(user_question):
     except Exception as e:
         response = "Error" + str(e)
     return response
+
+def play_audio(audio_file):
+    pass
+
+
+def show_audio_player(ai_content: str) -> None:
+    sound_file = BytesIO()
+    try:
+        print(f"Playing audio for: {ai_content}")
+        tts = gTTS(text=ai_content, lang='en', tld='com')
+        tts.write_to_fp(sound_file)
+        filename = "./temp/tts.mp3"
+        tts.save(filename)
+        # st.write(st.session_state.locale.stt_placeholder)
+        # st.audio(sound_file, autoplay=True)
+        pygame.mixer.init()
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play()
+    except gTTSError as err:
+        # st.error(err)
+        st.toast(err)
     
 def main():
     st.set_page_config(page_title="Test Page", page_icon="🔧", layout="wide")
@@ -77,7 +101,6 @@ def main():
         st.session_state.test_conv = [{
             "role": "assistant", 
             "content": "How can I help you?", 
-            "audio_file": "/home/ltq/documents/talk-is-cheap/assets/HowMayIHelpYou.wav"
         }]
         
     # Session state for sources
@@ -88,6 +111,10 @@ def main():
     if "image_source" not in st.session_state:
         st.session_state.image_source = None
         
+    # Session state for record_audio
+    if "record_audio_source" not in st.session_state:
+        st.session_state.record_audio_source = None
+        
     # Session state for model type
     if "model_type" not in st.session_state:
         st.session_state.model_type = "OpenAI"
@@ -95,26 +122,31 @@ def main():
     # Session state for chatopenai_testconvo
     if "chatopenai_testconvo" not in st.session_state:
         st.session_state.chatopenai_testconvo = get_conversation_chain()
+        
+    # Session state for audio settings
+    if "locale" not in st.session_state:
+        st.session_state.locale = en
+        
+    
     
     # Display chat messages
-    for message in st.session_state.test_conv:
+    for idx, message in enumerate(st.session_state.test_conv):
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
                 c1, c2 = st.columns([4, 1])
                 with c1:
                     st.write(message["content"])
                 with c2:
-                    if "audio_file" in message:
-                        st.button("🔊")
+                    play_audio = st.button("🔊", key=idx)
+                    if play_audio:
+                        show_audio_player(message['content'])
                                     
             elif message["role"] == "user":  
                 st.write(message["content"])
                 
             if "image" in message and message["image"] is not None:
                 st.image(message["image"], width=300)
-                
-                
-            
+                     
     # Chat input
     if prompt := st.chat_input("Ask a question"):
         st.session_state.test_conv.append({"role": "user", "content": prompt})
@@ -165,11 +197,35 @@ def main():
             else:
                 st.error("Please upload files")
     
-    # TODO Record audio using pyaudio, refer to https://github.com/theevann/streamlit-audiorecorder
+    # Record an audio for input
     with st.sidebar.expander("➕ &nbsp; Record Audio", expanded=False):
-        audio = audiorecorder("Click to record", "Click to stop recording")
+        # pip install streamlit-audiorecorder
+        audio_recorder = audiorecorder("Click to record", "Click to stop recording")
         
-    
+        if len(audio_recorder) > 0:
+            # To play audio in frontend:
+            st.audio(audio_recorder.export().read())  
+
+            # To save audio to a file, use pydub export method:
+            filename = "temp/audio.wav"
+            audio_recorder.export(filename, format="wav")
+
+            # To get audio properties, use pydub AudioSegment properties:
+            st.write(f"Frame rate: {audio_recorder.frame_rate}, Frame width: {audio_recorder.frame_width}, Duration: {audio_recorder.duration_seconds} seconds")
+            
+            st.session_state.record_audio_source = filename
+            
+    if len(audio_recorder) > 0 and st.session_state.record_audio_source != None:
+        st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+        with st.chat_message("user"):
+            with st.spinner("Uploading audio..."):
+                text_from_audio = speech_to_text(st.session_state.record_audio_source)
+                st.write(text_from_audio)
+ 
+            st.session_state.test_conv.append({"role": "user", "content": "STT: " + text_from_audio})
+        st.session_state.record_audio_source = None
+        st.rerun()
+                    
     with st.sidebar.expander("➕ &nbsp; Add Image", expanded=False):
         # Upload image
         input_file = None

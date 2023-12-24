@@ -2,15 +2,14 @@
 Title:          Using Huggingface Inference APIs
 '''
 
-
-import requests
 import os
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Whisper Large API
+# TODO Whisper Large API
 def speech_to_text_api(audio_file):
     API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
     headers = {"Authorization": f"Bearer {API_TOKEN}"}
@@ -22,6 +21,7 @@ def speech_to_text_api(audio_file):
         return response.json()
 
     output = query("sample1.flac")
+    return output
     
 
 # Blip Image Captioning API

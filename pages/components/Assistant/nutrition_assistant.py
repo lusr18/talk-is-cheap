@@ -20,7 +20,7 @@ from .assistant import AIAssistant
 load_dotenv()
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 nut_api_key = os.getenv("NINJA_API_KEY")
-milvus_host = os.getenv("MILVUS_HOST")
+milvus_host = os.getenv("MILVUS_HOST2")
 milvus_token = os.getenv("MILVUS_TOKEN")
     
 class GetDBSchema(Function):

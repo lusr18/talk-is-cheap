@@ -2,16 +2,12 @@ import os
 import streamlit as st
 import base64
 from pathlib import Path
-from utils import load_bootstrap
 
 # Langchain
 from langchain.llms.openai import OpenAI
 from langchain.chat_models import ChatOpenAI
-# from langchain.vectorstores import vectorstore
-from langchain.chains import ConversationChain, ConversationalRetrievalChain
+from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
-from langchain.callbacks import get_openai_callback
-from utils import nav_to
 
 # Custom
 from huggingface.hf_apis import image_to_caption

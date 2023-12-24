@@ -227,7 +227,7 @@ class NutritionsToolkit(BaseToolkit):
         
 if __name__ == "__main__":
     llm     = OpenAI(model="gpt-3.5-turbo-instruct", temperature=0, max_tokens=1000)
-    db      = SQLDatabase.from_uri("sqlite:///personal.sqlite3")
+    db      = SQLDatabase.from_uri("sqlite:///database/personal_db.sqlite3")
     memory  = ConversationBufferMemory(memory_key="chat_history")
     
     toolkit = NutritionsToolkit(

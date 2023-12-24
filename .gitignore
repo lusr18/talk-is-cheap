@@ -2,6 +2,9 @@
 __pycache__/
 db/
 temp/
+models/
+.vscode
+
 
 personal_notes.md
 

@@ -7,9 +7,15 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceHub
-    
 import streamlit as st
+import torch
 
+
+def get_torch_device():
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cuda" if torch.cuda.is_available() else "cpu"
+    
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -74,3 +80,57 @@ def load_bootstrap():
     return st.markdown('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">', unsafe_allow_html=True)
 
 
+
+
+# Language settings
+from dataclasses import dataclass
+from typing import List
+
+# https://blog.streamlit.io/ai-talks-chatgpt-assistant-via-streamlit/#3-how-to-convert-text-to-speech-tts
+@dataclass
+class Locale:
+    ai_role_options: List[str]
+    ai_role_prefix: str
+    ai_role_postfix: str
+    title: str
+    language: str
+    lang_code: str
+    chat_placeholder: str
+    chat_run_btn: str
+    chat_clear_btn: str
+    chat_save_btn: str
+    select_placeholder1: str
+    select_placeholder2: str
+    select_placeholder3: str
+    radio_placeholder: str
+    radio_text1: str
+    radio_text2: str
+    stt_placeholder: str
+
+AI_ROLE_OPTIONS_EN = [
+    "helpful assistant",
+    "code assistant",
+    "code reviewer",
+    "text improver",
+    "cinema expert",
+    "sports expert",
+]
+en = Locale(
+    ai_role_options=AI_ROLE_OPTIONS_EN,
+    ai_role_prefix="You are a female",
+    ai_role_postfix="Answer as concisely as possible.",
+    title="AI Talks",
+    language="English",
+    lang_code="en",
+    chat_placeholder="Start Your Conversation With AI:",
+    chat_run_btn="Ask",
+    chat_clear_btn="Clear",
+    chat_save_btn="Save",
+    select_placeholder1="Select Model",
+    select_placeholder2="Select Role",
+    select_placeholder3="Create Role",
+    radio_placeholder="Role Interaction",
+    radio_text1="Select",
+    radio_text2="Create",
+    stt_placeholder="To Hear The Voice Of AI Press Play",
+)
