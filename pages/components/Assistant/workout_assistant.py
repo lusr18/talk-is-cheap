@@ -7,6 +7,7 @@ import os
 import sqlite3
 import requests
 from dotenv import load_dotenv
+from youtube_transcript_api import YouTubeTranscriptApi
 
 # Langchain
 from langchain.vectorstores import Milvus
@@ -124,8 +125,37 @@ class GetPersonBMR(Function):
         else:  # 'female'
             return (10 * weight) + (6.25 * height) - (5 * age) - 161
         
-            
-            
+class GetYoutubeTranscript(Function):
+    def __init__(self):
+        super().__init__(
+            name="GetYoutubeTranscript",
+            description="Get the transcript from a youtube video given the url",
+            parameters=[
+                Property(
+                    name="url",
+                    description="The link to the youtube video workout the user wants to follow",
+                    type="string",
+                    required=True,
+                ),
+            ]
+        )
+    def function(self, url):
+        # Identify unique url id
+        video_id = url.split("=")[1]
+        if '&pp' in video_id:
+            video_id = video_id.split("&pp")[0]
+        # Acquire transcript from url with exception catch for empty transcript
+        output = ""
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(video_id,
+                                                languages=['en'])
+            for i in transcript:
+                output = output + i["text"] + "\n"
+        except:
+            print("Transcript could not be fetched, skipping video.")
+            return
+        # Write transcript from received object to AIAssistant
+        return output
 
 def create_workout_agent() -> AIAssistant:
     """ Create a workout assistant agent """
@@ -134,9 +164,10 @@ def create_workout_agent() -> AIAssistant:
     First obtain the schema of the database to check the tables and columns, then generate SQL queries to answer the questions.
     The user can also query workout advice for their goals.
     The user can also ask about the BMI and BMR of a person. Calculate this using GetPersonBMI() and GetPersonBMR respectively depending on which one is requested.
+    The user can also provide a youtube video of a workout they want to follow. Turn the youtube video into transcript, and coach the user through the workout, wait for the user to finish each exercise and record the user's exercise information into the user's personal database until the workout from the video is complete. 
     Keep responses short and concise, only respond to what the user wants."""
     
-    functions = [GetDBSchema(), RunSQLQuery(), GetPersonBMI(), GetPersonBMR()]
+    functions = [GetDBSchema(), RunSQLQuery(), GetPersonBMI(), GetPersonBMR(), GetYoutubeTranscript()]
     
     assistant = AIAssistant(
         instruction=instruction,
