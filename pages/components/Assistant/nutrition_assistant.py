@@ -163,7 +163,7 @@ class GetPersonBMR(Function):
 def create_nutrition_agent() -> AIAssistant:
     """ Create a nutrition assistant agent """
     
-    instruction = """You are a Nutrition experts. User asks you questions about the nutrition database which contains user, food, and personal tracking.
+    instruction = """You are a Nutrition experts. User asks you questions about the nutrition database which contains user, food, and person_tracking tables.
     First obtain the schema of the database to check the tables and columns, then generate SQL queries to answer the questions.
     The user can also query nutrition information for a food.
     The user can also ask about the BMI and BMR of a person. But before calculating, get information from the nutrition database."""

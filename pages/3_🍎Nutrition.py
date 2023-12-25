@@ -1,7 +1,9 @@
 import os
 import streamlit as st
+from audiorecorder import audiorecorder
 import base64
 from pathlib import Path
+import time
 
 # Langchain
 from langchain.llms.openai import OpenAI
@@ -62,6 +64,7 @@ def clear_conversation():
     
     st.session_state.assistant_agent = create_nutrition_agent()
     st.session_state.assistant_agent.create_chat_instance()
+    st.session_state.record_audiorecorder = None
     pass
 
 
@@ -96,9 +99,20 @@ def main():
     if "audio_source" not in st.session_state:
         st.session_state.audio_source = None
         
+    # Session state for record_audio
+    if "record_audio_source" not in st.session_state:
+        st.session_state.record_audio_source = None
+        
+    if "record_audio_length" not in st.session_state:
+        st.session_state.record_audio_length = 0
+        
+    if "record_audiorecorder" not in st.session_state:
+        st.session_state.record_audiorecorder = None
+        
     # Session state for model type
     if "model_type" not in st.session_state:
         st.session_state.model_type = "OpenAI"
+        
         
     
     # Display chat messages
@@ -113,27 +127,15 @@ def main():
         st.session_state.nutrition_conv.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
-            
-    # Generate a new response if the last message is not from the assistant
-    if st.session_state.nutrition_conv[-1]["role"] != "assistant":
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                # TODO Make a call to ...
-                response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
-                # response = "Echo response"
-                placeholder = st.empty()
-                placeholder.markdown(response)
-            
-        st.session_state.nutrition_conv.append({'role': 'assistant', 'content': response})
-        
+    
     with st.sidebar:
         st.subheader("Clear Conversation")
         clear_conversation_button = st.button("Clear")
         if clear_conversation_button:
             clear_conversation()
             st.rerun()
-    
-    # Sidedbar
+            
+     # Sidedbar
     with st.sidebar.expander("➕ &nbsp; Image Media Uploader", expanded=False):
         # Upload image
         image_input_file = None
@@ -179,13 +181,6 @@ def main():
                         "image": st.session_state.image_source,
                         "image_link": "temp/" + st.session_state.image_source.name
                     })
-            # with st.chat_message("assistant"):
-            #     with st.spinner("Analyzing image..."):
-            #         image_path = os.path.join("temp",  st.session_state.image_source.name)
-            #         response = image_to_caption(image_path)
-            #         st.write("This image is of a " + response)
-
-            # st.session_state.nutrition_conv.append({'role': 'assistant', 'content': "This is an image of " + response + ". What are it's nutrients?"})
         st.rerun()
         
     with st.sidebar.expander("➕ &nbsp; Add Recording", expanded=False):
@@ -229,6 +224,56 @@ def main():
                     # print("Speech to text result: ",text_from_audio)
                 st.session_state.nutrition_conv.append({"role": "user", "content": text_from_audio})
             st.rerun()
+            
+    # Record an audio for input
+    with st.sidebar.expander("➕ &nbsp; Record Audio", expanded=False):
+        # pip install streamlit-audiorecorder
+        st.session_state.record_audiorecorder = audiorecorder("Click to record", "Click to stop recording")
+        
+        if len(st.session_state.record_audiorecorder) > 0:
+            # To play audio in frontend:
+            # st.audio(st.session_state.record_audiorecorder.export().read())  
 
+            # To save audio to a file, use pydub export method:
+            filename = "temp/audio.wav"
+            st.session_state.record_audiorecorder.export(filename, format="wav")
+
+            # To get audio properties, use pydub AudioSegment properties:
+            st.write(f"Frame rate: {st.session_state.record_audiorecorder.frame_rate}, Frame width: {st.session_state.record_audiorecorder.frame_width}, Duration: {st.session_state.record_audiorecorder.duration_seconds} seconds")
+            
+            st.session_state.record_audio_source = filename
+            st.session_state.record_audio_length = len(st.session_state.record_audiorecorder)
+                    
+
+    if len(st.session_state.record_audiorecorder) > 0 and st.session_state.record_audio_length > 0:
+        with st.chat_message("user"):
+            print("First Len", len(st.session_state.record_audiorecorder))
+            with st.spinner("Uploading audio..."):
+                audio_src = st.session_state.record_audio_source
+                st.session_state.record_audio_source = None
+                text_from_audio = speech_to_text(audio_file=audio_src)
+                st.write(text_from_audio)
+                
+                st.session_state.record_audiorecorder._data = b''
+                print("Second Len", len(st.session_state.record_audiorecorder))
+                st.session_state.record_audiorecorder = None
+                st.session_state.record_audio_source = None
+                st.session_state.record_audio_length = 0
+
+                st.session_state.nutrition_conv.append({"role": "user", "content":  text_from_audio})
+
+            
+    # Generate a new response if the last message is not from the assistant
+    if st.session_state.nutrition_conv[-1]["role"] != "assistant":
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                # TODO Make a call to ...
+                response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
+                # response = "Echo response"
+                placeholder = st.empty()
+                placeholder.markdown(response)
+            
+        st.session_state.nutrition_conv.append({'role': 'assistant', 'content': response})
+        
 if __name__ == "__main__":
     main()

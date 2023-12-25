@@ -27,7 +27,10 @@ def speech_to_text(audio_file):
     torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
     # model_id    = "distil-whisper/distil-small.en"
     # model_id    = "./models/distil-small.en"
-    model_id = os.path.expanduser("/home/ftpuser/distil-small.en")
+    if os.path.exists("./models/distil-small.en"):
+        model_id    = "./models/distil-small.en"
+    else:
+        model_id = os.path.expanduser("/home/ftpuser/distil-small.en")
     model       = AutoModelForSpeechSeq2Seq.from_pretrained(
         model_id, 
         torch_dtype=torch_dtype, 

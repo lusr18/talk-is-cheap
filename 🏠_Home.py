@@ -32,13 +32,13 @@ os.environ["MILVUS_HOST2_AUTH"] = os.getenv("MILVUS_HOST2_AUTH")
 # os.environ["HTTPS_PROXY"] = os.getenv("HTTPS_PROXY")
 # os.environ["ALL_PROXY"] = os.getenv("ALL_PROXY")
 
-# # Remove HTTP_PROXY and HTTPS_PROXY
-# if 'HTTP_PROXY' in os.environ:
-#     del os.environ['HTTP_PROXY']
-# if 'HTTPS_PROXY' in os.environ:
-#     del os.environ['HTTPS_PROXY']
-# if 'ALL_PROXY' in os.environ:
-#     del os.environ['ALL_PROXY']
+# Remove HTTP_PROXY and HTTPS_PROXY
+if 'HTTP_PROXY' in os.environ:
+    del os.environ['HTTP_PROXY']
+if 'HTTPS_PROXY' in os.environ:
+    del os.environ['HTTPS_PROXY']
+if 'ALL_PROXY' in os.environ:
+    del os.environ['ALL_PROXY']
 
 import urllib
 print(urllib.request.getproxies())

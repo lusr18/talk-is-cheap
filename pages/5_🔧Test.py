@@ -222,18 +222,17 @@ def main():
             st.session_state.record_audio_source = filename
             
     if st.session_state.record_audio_source != None:
-        st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+        # st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
         with st.chat_message("user"):
             with st.spinner("Uploading audio..."):
                 text_from_audio = speech_to_text(st.session_state.record_audio_source)
                 st.write(text_from_audio)
-                audio_recorder.clear_audio()
-                print(len(audio_recorder))
+                audio_recorder._data = b''
                 st.session_state.record_audio_source = None
  
             st.session_state.test_conv.append({"role": "user", "content": "STT: " + text_from_audio})
         
-        st.rerun()
+        # st.rerun()
                     
     with st.sidebar.expander("➕ &nbsp; Add Image", expanded=False):
         # Upload image
@@ -263,7 +262,7 @@ def main():
             print("No audio files...")
             st.warning('No uploaded audio files...', icon="⚠️")
         else:
-            st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+            # st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
             print("Speech to text...")
             with st.chat_message("user"):
                 with st.spinner("Uploading..."):
@@ -281,7 +280,7 @@ def main():
             print("No image file...")
             st.warning("No uploaded image files...", icon="⚠️")
         else:
-            st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+            # st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
             print("Image to text...")
             with st.chat_message("user"):
                 with st.container():
