@@ -70,7 +70,7 @@ def uploader_callback(a):
     
     
 def main():
-    st.set_page_config(page_title="Nutrition Page", page_icon="🍎", layout="wide")
+    st.set_page_config(page_title="Nutrition", page_icon="🍎", layout="wide")
     
     st.header("🍎 Nutrition Page")
     st.write("Keep track of your nutrition here")
@@ -227,7 +227,7 @@ def main():
                     text_from_audio = speech_to_text(st.session_state.audio_source)
                     st.write(text_from_audio)
                     # print("Speech to text result: ",text_from_audio)
-                st.session_state.nutrition_conv.append({"role": "user", "content": "STT: " + text_from_audio})
+                st.session_state.nutrition_conv.append({"role": "user", "content": text_from_audio})
             st.rerun()
 
 if __name__ == "__main__":

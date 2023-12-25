@@ -172,7 +172,7 @@ def create_nutrition_agent() -> AIAssistant:
     
     assistant = AIAssistant(
         instruction=instruction,
-        model="gpt-3.5-turbo-1106",
+        model=os.getenv("OPENAI_DEFAULT_MODEL"),
         functions=functions,
         verbose=True,
         use_code_interpreter=True, 

@@ -1,5 +1,10 @@
 # 
 import os
+import requests
+import time
+import math
+import re
+import calendar
 import streamlit as st
 import base64
 from pathlib import Path
@@ -12,6 +17,7 @@ from audiorecorder import audiorecorder
 from io import BytesIO
 from gtts import gTTS, gTTSError
 import pygame
+
 
 # Langchain
 from langchain.llms.openai import OpenAI
@@ -77,8 +83,8 @@ def show_audio_player(ai_content: str) -> None:
         tts.write_to_fp(sound_file)
         filename = "./temp/tts.mp3"
         tts.save(filename)
-        # st.write(st.session_state.locale.stt_placeholder)
-        # st.audio(sound_file, autoplay=True)
+        # # st.write(st.session_state.locale.stt_placeholder)
+        # # st.audio(sound_file, autoplay=True)
         pygame.mixer.init()
         pygame.mixer.music.load(filename)
         pygame.mixer.music.play()
@@ -215,15 +221,18 @@ def main():
             
             st.session_state.record_audio_source = filename
             
-    if len(audio_recorder) > 0 and st.session_state.record_audio_source != None:
+    if st.session_state.record_audio_source != None:
         st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
         with st.chat_message("user"):
             with st.spinner("Uploading audio..."):
                 text_from_audio = speech_to_text(st.session_state.record_audio_source)
                 st.write(text_from_audio)
+                audio_recorder.clear_audio()
+                print(len(audio_recorder))
+                st.session_state.record_audio_source = None
  
             st.session_state.test_conv.append({"role": "user", "content": "STT: " + text_from_audio})
-        st.session_state.record_audio_source = None
+        
         st.rerun()
                     
     with st.sidebar.expander("➕ &nbsp; Add Image", expanded=False):

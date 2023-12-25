@@ -131,7 +131,7 @@ def clear_conversation():
     st.session_state.knowledge_conv = [{"role": "assistant", "content": "Ask me anything fitness/health related. I will try my best to answer given the embedded knowledge base."}]
 
 def main():
-    st.set_page_config(page_title="Knowledge Page", page_icon="🧠", layout="wide")
+    st.set_page_config(page_title="Knowledge", page_icon="🧠", layout="wide")
 
     st.header("🧠 Knowledge Page")
     st.write("Interact with our fitness/health knowledge base.")
