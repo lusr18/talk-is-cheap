@@ -40,25 +40,8 @@ from langchain_core.memory import BaseMemory
 from langchain_core.pydantic_v1 import Field
 
 # Custom
-from trainer_prompts import TrainerPrompts
+from pages.components.trainer_prompts import TrainerPrompts
 
-
-
-# # Database
-# db = SQLDatabase.from_uri("sqlite:///personal.sqlite3")
-# toolkit = SQLDatabaseToolkit(db=db, llm=llm)
-
-# agent_executer = create_sql_agent(
-#     llm=llm,
-#     toolkit=toolkit,
-#     verbose=True,
-#     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION
-# )
-
-# with get_openai_callback() as cb:
-#     agent_executer.run("Describe the food table")
-    
-# print(cb)
 
 NUTRITION_PREFIX = """You are an agent designed to be a helpful personal nutritionist. Agent has access to the following tools {tools}. Don't use more tools than you need to answer the question. 
 
@@ -161,7 +144,6 @@ class NinjaAPINutritionTool(NutritionBaseTool, BaseTool):
         else:
             return {"Error": response.status_code, "Message": response.text}
         
-        
 class CalculateBMITool(BaseTool):
     """ Tool for calculating BMI. """
     
@@ -224,6 +206,29 @@ class NutritionsToolkit(BaseToolkit):
             calculate_bmi_tool,
             nutrition_sql_db_tool 
         ]
+        
+        
+def create_nutrition_langchain_agent():
+    llm     = OpenAI(model="gpt-3.5-turbo-instruct", temperature=0, max_tokens=1000)
+    db      = SQLDatabase.from_uri("sqlite:///database/personal_db.sqlite3")
+    memory  = ConversationBufferMemory(memory_key="chat_history")
+    
+    toolkit = NutritionsToolkit(
+        nut_api_key=os.getenv("NINJA_API_KEY"),
+        llm=llm,
+        db=db
+    )
+    agent_executer = create_nutrition_agent(
+        llm=llm,
+        memory=memory,
+        toolkit=toolkit,
+        verbose=True,
+        input_variables=["input", "chat_history", "agent_scratchpad"],
+        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION
+    )
+    
+    return agent_executer
+    
         
 if __name__ == "__main__":
     llm     = OpenAI(model="gpt-3.5-turbo-instruct", temperature=0, max_tokens=1000)

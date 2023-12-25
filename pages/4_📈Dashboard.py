@@ -204,8 +204,8 @@ def main():
             conn.close()
             st.success("Added!")
             st.balloons()
-
-        
+            
+            
         selected = pills("Workout Type", ["All", "Bench Press", "Squat", "Deadlift"], ["👻","🍀", "🎈", "🌈"])
         
         pop_work_df = create_workout_dashboard([selected], st.session_state.selected_date)
@@ -237,7 +237,41 @@ def main():
         nut_df, cal_df = create_nutrition_dashboard(st.session_state.selected_date)
         
         st.write("Nutrition")
-        # st.table(nut_df)
+
+        st.write("Add New Exercise")
+        
+        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns([1, 1, 1, 1, 1, 1, 1, 1], gap="small")
+        
+        with col1:
+            food_name = st.text_input("Food Name", key="food_name")
+        with col2:
+            food_date = st.date_input("Food date", value=st.session_state.selected_date, key="food_date")
+        with col3:
+            calories = st.number_input("Calories (Kcal)", key="calories")
+        with col4:
+            carbohydrates = st.number_input("Carbohydrates(g)", key="carbohydrates")
+        with col5:
+            fat = st.number_input("Fat(g)", key="fat")
+        with col6:
+            protein = st.number_input("Protein(g)", key="protein")
+        with col7:
+            sodium = st.number_input("Sodium(mg)", key="sodium")
+        with col8:
+            sugar = st.number_input("Sugar(g)", key="sugar")
+        
+        notes = st.text_area("Notes", key="food_notes")
+    
+        add_button = st.button("Add", key="add_button")
+        if add_button:
+            conn = connect_db("./database/nutrition_db.sqlite3")
+            cursor = conn.cursor()
+            # cursor.execute("INSERT INTO exercise (exercise_name, exercise_date, exercise_type, sets, reps, weight_kg, notes) VALUES (?, ?, ?, ?, ?, ?, ?)", (exercise_name, exercise_date, exercise_type, sets, reps, weight_kg, notes))
+            cursor.execute("INSERT INTO food (food_name, food_date, calories_kcal, carbohydrates_g, fat_g, protein_g, sodium_mg, sugar_g, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ", (food_name, food_date, calories, carbohydrates, fat, protein, sodium, sugar, notes))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            st.success("Added!")
+            st.balloons() 
         
         edited_df = st.data_editor(
             nut_df,

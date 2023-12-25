@@ -18,7 +18,6 @@ from io import BytesIO
 from gtts import gTTS, gTTSError
 import pygame
 
-
 # Langchain
 from langchain.llms.openai import OpenAI
 from langchain.chat_models import ChatOpenAI

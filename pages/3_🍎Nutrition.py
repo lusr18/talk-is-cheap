@@ -14,7 +14,15 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 # Custom
 from huggingface.hf_apis import image_to_caption
 from pages.components.Assistant.nutrition_assistant import create_nutrition_agent
+from pages.components.nutrition_agent_langchain import create_nutrition_langchain_agent
+from pages.components.nutrition_agent_chatcomp import create_nutrition_agent_chatcomp
 from huggingface.distil_small import speech_to_text
+
+agent_types_dict= {
+    "Assistant": 0,
+    "ZeroShotReact": 1,
+    "ChatCompletion": 2
+}
 
 def img_to_bytes(img_path):
     img_bytes = Path(img_path).read_bytes()
@@ -46,6 +54,15 @@ def get_conversation_chain():
 #     except Exception as e:
 #         response = "Error" + str(e)
 #     return response
+def select_agent(agent_type):
+    if agent_type == "Assistant":
+        return create_nutrition_agent()
+    elif agent_type == "ZeroShotReact":
+        return create_nutrition_langchain_agent()
+    elif agent_type == "ChatCompletion":
+        return create_nutrition_agent_chatcomp()
+    else:
+        raise ValueError("Invalid agent type")
 
 # User AssistantAgent to handle user input
 def handle_userinput(user_question):
@@ -61,11 +78,12 @@ def clear_conversation():
     st.session_state.nutrition_conv = [{"role": "assistant", "content": "I am your nutrition assistant. Ask me about yourself, nutrient information, your food data, and more!"}]
     
     # Reset AssistantAgent
+    st.session_state.assistant_agent = select_agent(st.session_state.agent_type)
     
-    st.session_state.assistant_agent = create_nutrition_agent()
-    st.session_state.assistant_agent.create_chat_instance()
+    if st.session_state.agent_type == "Assistant":
+        st.session_state.assistant_agent.create_chat_instance()
+        
     st.session_state.record_audiorecorder = None
-    pass
 
 
 def uploader_callback(a):
@@ -78,6 +96,10 @@ def main():
     st.header("🍎 Nutrition Page")
     st.write("Keep track of your nutrition here")
     
+    # Session state to store agent type
+    if 'agent_type' not in st.session_state:
+        st.session_state.agent_type = "Assistant"
+    
     # Session state to store the conversation
     if 'nutrition_conv' not in st.session_state:
         st.session_state.nutrition_conv = [{"role": "assistant", "content": "I am your nutrition assistant. Ask me about yourself, nutrient information, your food data, and more!"}]
@@ -88,8 +110,11 @@ def main():
         
     # Create assistant agent
     if "assistant_agent" not in st.session_state:
-        st.session_state.assistant_agent = create_nutrition_agent()
-        st.session_state.assistant_agent.create_chat_instance()
+        # st.session_state.assistant_agent = create_nutrition_agent()
+        # st.session_state.assistant_agent.create_chat_instance()
+        st.session_state.assistant_agent = select_agent(st.session_state.agent_type)
+        if st.session_state.agent_type == "Assistant":
+            st.session_state.assistant_agent.create_chat_instance()
         
     # Session state for image
     if "image_source" not in st.session_state:
@@ -108,13 +133,12 @@ def main():
         
     if "record_audiorecorder" not in st.session_state:
         st.session_state.record_audiorecorder = None
+
         
     # Session state for model type
     if "model_type" not in st.session_state:
         st.session_state.model_type = "OpenAI"
         
-        
-    
     # Display chat messages
     for idx, message in enumerate(st.session_state.nutrition_conv):
         with st.chat_message(message["role"]):
@@ -133,6 +157,20 @@ def main():
         clear_conversation_button = st.button("Clear")
         if clear_conversation_button:
             clear_conversation()
+            st.rerun()
+            
+        # Agent Type
+        st.subheader("Agent Type")
+        agent_types = ["Assistant", "ZeroShotReact", "ChatCompletion"]
+        agent_radio = st.radio("Select agent type", agent_types, index=agent_types_dict[st.session_state.agent_type], key="agent_type_radio")
+        if agent_radio and agent_radio != st.session_state.agent_type:
+            print(f"Agent changed from {st.session_state.agent_type} to {agent_radio}")
+            st.session_state.agent_type = agent_radio
+            st.session_state.assistant_agent = select_agent(agent_type=agent_radio)
+            if st.session_state.agent_type == "Assistant":
+                # TODO Clear previous conversation
+                st.session_state.assistant_agent.create_chat_instance()
+            st.session_state.nutrition_conv = [{"role": "assistant", "content": "I am your nutrition assistant. Ask me about yourself, nutrient information, your food data, and more!"}]
             st.rerun()
             
      # Sidedbar
@@ -268,7 +306,13 @@ def main():
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 # TODO Make a call to ...
-                response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
+                print("Nutrient agent type", st.session_state.agent_type)
+                if st.session_state.agent_type == "Assistant":
+                    response = handle_userinput(st.session_state.nutrition_conv[-1]["content"])
+                elif st.session_state.agent_type == "ZeroShotReact":
+                    response = st.session_state.assistant_agent.run(st.session_state.nutrition_conv[-1]["content"])
+                elif st.session_state.agent_type == "ChatCompletion":
+                    response = st.session_state.assistant_agent.ask(st.session_state.nutrition_conv[-1]["content"])
                 # response = "Echo response"
                 placeholder = st.empty()
                 placeholder.markdown(response)
