@@ -94,16 +94,38 @@ class GetNutritionInfo(Function):
             formatted_data.append(formatted_food_data)
 
         return str(formatted_data)
+    
+# https://api.api-ninjas.com/v1/recipe?query=
+class GetRecipeInfo(Function):
+    def __init__(self):
+        super().__init__(
+            name="get_recipe_info",
+            description="Get the recipe information for a food",
+            parameters=[
+                Property(
+                    name="recipe",
+                    description="The name of the recipe",
+                    type="string",
+                    required=True,
+                ),
+            ]
+        )  
+    def function(self, recipe):
+        api_url = 'https://api.api-ninjas.com/v1/recipe?query={}'.format(recipe)
+        response = requests.get(api_url, timeout=100, headers={'X-Api-Key': nut_api_key})   
+        response_json = response.json()
+        return str(response_json)
+
   
 class GetPersonBMI(Function):
     def __init__(self):
         super().__init__(
             name="get_bmi",
-            description="Get the BMI of a person using their height and weight",
+            description="Get the BMI of a person using their height (cm) and weight (kg)",
             parameters=[
                 Property(
                     name="height",
-                    description="The height of the person in meters",
+                    description="The height of the person in centimeters",
                     type="number",
                     required=True,
                 ),
@@ -116,7 +138,8 @@ class GetPersonBMI(Function):
             ]
         )
     def function(self, height, weight):
-        bmi = weight / (height ** 2)
+        height_meters = height / 100            # Convert height from cm to m
+        bmi = weight / (height_meters ** 2)     # Calculate BMI
         return "The BMI of the person is {:.2f}".format(bmi)
     
 class GetPersonBMR(Function):
@@ -168,7 +191,7 @@ def create_nutrition_agent() -> AIAssistant:
     The user can also query nutrition information for a food.
     The user can also ask about the BMI and BMR of a person. But before calculating, get information from the nutrition database."""
     
-    functions = [GetDBSchema(), RunSQLQuery(), GetNutritionInfo(), GetPersonBMI(), GetPersonBMR()]
+    functions = [GetDBSchema(), RunSQLQuery(), GetNutritionInfo(), GetPersonBMI(), GetPersonBMR(), GetRecipeInfo()]
     
     assistant = AIAssistant(
         instruction=instruction,

@@ -11,23 +11,18 @@ import logging
 from typing import Optional
 
 from openai import OpenAI
-import gradio as gr
+# import gradio as gr
 
 from dotenv import load_dotenv
 load_dotenv()
 
 # Custom
-# from pages.components.utils import func_to_json
-from utils import func_to_json
-# from pages.components.agents import Agent
-# from agents import Agent
+from pages.components.utils import func_to_json
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
 
-sys_msg = """Our Assistant is an advanced software system powered by OpenAI's GPT-4.
-
-The Assistant is specifically designed to assist with tasks related to health, fitness, and nutrition. It provides valuable calculations related to health metrics such as Basal Metabolic Rate (BMR) and Total Daily Energy Expenditure (TDEE) using recognized equations like Harris-Benedict and Mifflin-St Jeor. Additionally, it can fetch nutritional information of various food items using an external API.
+sys_msg = """The Assistant is specifically designed to assist with tasks related to health and nutrition. It provides valuable calculations related to health metrics such as Basal Metabolic Rate (BMR) and Total Daily Energy Expenditure (TDEE) using recognized equations like Harris-Benedict and Mifflin-St Jeor. Additionally, it can fetch nutritional information of various food items using an external API.
 
 Its capabilities allow it to engage in meaningful conversations and provide helpful responses related to health and nutrition. Based on the input it receives, the Assistant can calculate and provide critical health metric values, allowing users to better understand their energy expenditure and nutritional intake.
 
@@ -40,7 +35,8 @@ class Agent:
     def __init__(self, 
         openai_api_key: str, 
         model_name: str = 'gpt-3.5-turbo', 
-        functions: Optional[list] = None):
+        functions: Optional[list] = None,
+        verbose: bool = False):
         
         self.openai_client = OpenAI()
         self.openai_client.api_key = openai_api_key
@@ -48,6 +44,8 @@ class Agent:
         self.functions = self._parse_functions(functions)       
         self.func_mapping = self._create_func_mapping(functions)
         self.chat_history = [{'role': 'system', 'content': sys_msg}]
+        self.logger = logging.getLogger(__name__)
+        self.verbose = verbose
         
     def _parse_functions(self, functions: Optional[list]) -> Optional[list]:
         if functions is None:
@@ -135,10 +133,12 @@ class Agent:
     def _call_function(self, func_name: str, args_str: dict):
         """ Call the function specified by func_name with the arguments specified by args """
         args = json.loads(args_str)
-        logger.info("Calling function: {}".format(func_name))
-        logger.info("Arguments: {}".format(args))
         func = self.func_mapping[func_name]
-        logger.info(f"Function object: {func}")
+        
+        if self.verbose:
+            self.logger.info("Calling function: {}".format(func_name))
+            self.logger.info("Arguments: {}".format(args))
+            self.logger.info(f"Function object: {func}")
         res = func(**args)
         return res
    
@@ -307,10 +307,9 @@ class NutritionAgent:
         else:
             raise ValueError("Invalid gender. Expected 'male' or 'female'.")
      
-    # TODO Interact with database
-                 
     def ask(self, question: str):
         response = self.agent.ask(question)
+        response = response.choices[0].message.content
         return response
 
     def view_functions(self):
@@ -322,45 +321,48 @@ class NutritionAgent:
 openai_api_key = os.getenv("OPENAI_API_KEY")
 nut_api_key    = os.getenv("NINJA_API_KEY")
 
-fitness_agent = NutritionAgent(openai_api_key=openai_api_key, nut_api_key=nut_api_key)
+# fitness_agent = NutritionAgent(openai_api_key=openai_api_key, nut_api_key=nut_api_key)
 
-def get_response(message, history):
-    formatted_chat_history = [
-        {
-            'role': 'system',
-            'content': 'Assistant is a large language model trained by OpenAI.\n\nAssistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussion on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.\n\nAssistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.\n\nOverall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.\n'
-        }
-    ]
+# def get_response(message, history):
+#     formatted_chat_history = [
+#         {
+#             'role': 'system',
+#             'content': 'Assistant is a large language model trained by OpenAI.\n\nAssistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussion on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.\n\nAssistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.\n\nOverall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.\n'
+#         }
+#     ]
 
-    if history:
-        for i, chat in enumerate(history[0]):
-            formatted_chat_history.append({
-                'role': 'user' if i % 2 == 0 else 'assistant',
-                'content': chat
-            })
+#     if history:
+#         for i, chat in enumerate(history[0]):
+#             formatted_chat_history.append({
+#                 'role': 'user' if i % 2 == 0 else 'assistant',
+#                 'content': chat
+#             })
             
-        fitness_agent.chat_history = formatted_chat_history
+#         fitness_agent.chat_history = formatted_chat_history
 
-        print("Chat history: ")
-        logger.info(fitness_agent.chat_history)
+#         print("Chat history: ")
+#         logger.info(fitness_agent.chat_history)
 
-    # Get raw chat response
-    print("^" * 150)
-    print("Asking....")
-    res = fitness_agent.ask(message)
+#     # Get raw chat response
+#     print("^" * 150)
+#     print("Asking....")
+#     res = fitness_agent.ask(message)
 
-    chat_response = res.choices[0].message.content
-    print("Chat response: ", chat_response)
-    print("Done asking... \n\n\n")
-    print("^" * 150)
+#     chat_response = res.choices[0].message.content
+#     print("Chat response: ", chat_response)
+#     print("Done asking... \n\n\n")
+#     print("^" * 150)
 
-    return chat_response
+#     return chat_response
+
+def create_nutrition_agent_chatcomp():
+    return  NutritionAgent(openai_api_key=openai_api_key, nut_api_key=nut_api_key)
         
-if __name__ == "__main__":
-    chat_interface = gr.ChatInterface(
-        fn=get_response,
-        title="Fitness Agent",
-        description="A simple chatbot using a Fitness Agent and Gradio with conversation history",
-    )
+# if __name__ == "__main__":
+#     chat_interface = gr.ChatInterface(
+#         fn=get_response,
+#         title="Fitness Agent",
+#         description="A simple chatbot using a Fitness Agent and Gradio with conversation history",
+#     )
 
-    chat_interface.launch()
+#     chat_interface.launch()

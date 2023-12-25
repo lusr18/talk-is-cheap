@@ -163,8 +163,6 @@ def main():
     st.header("🏋️ Fitness Trainer")
     # st.write("Ask me about your workouts ")
     
-
-        
     # Session state for db name
     if "personal_db_name" not in st.session_state:
         st.session_state.personal_db_name = None
