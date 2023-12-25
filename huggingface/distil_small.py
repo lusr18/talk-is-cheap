@@ -20,11 +20,12 @@ os.environ['ALL_PROXY'] = "socks5://127.0.0.1:7890"
 
 # Pretrained
 def speech_to_text(audio_file):
-    print('\033[39m' + "Speech to Text")
+    color = '\033[32m'
+    print(f"{color}Speech to Text")
     device      = get_torch_device()
     torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
     # model_id    = "distil-whisper/distil-small.en"
-    model_id    = "./models/distill-small.en"
+    model_id    = "./models/distil-small.en"
     model       = AutoModelForSpeechSeq2Seq.from_pretrained(
         model_id, 
         torch_dtype=torch_dtype, 

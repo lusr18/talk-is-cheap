@@ -12,6 +12,7 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 # Custom
 from huggingface.hf_apis import image_to_caption
 from pages.components.Assistant.nutrition_assistant import create_nutrition_agent
+from huggingface.distil_small import speech_to_text
 
 def img_to_bytes(img_path):
     img_bytes = Path(img_path).read_bytes()
@@ -91,6 +92,10 @@ def main():
     if "image_source" not in st.session_state:
         st.session_state.image_source = None
         
+    # Session state for audio
+    if "audio_source" not in st.session_state:
+        st.session_state.audio_source = None
+        
     # Session state for model type
     if "model_type" not in st.session_state:
         st.session_state.model_type = "OpenAI"
@@ -131,27 +136,27 @@ def main():
     # Sidedbar
     with st.sidebar.expander("➕ &nbsp; Image Media Uploader", expanded=False):
         # Upload image
-        input_file = None
-        input_file = st.file_uploader(
+        image_input_file = None
+        image_input_file = st.file_uploader(
             "Upload a single image",
             type=["jpg", "png"],
             accept_multiple_files=False
         )
         
-        add_media = st.button(label="Upload!", key="upload_image")
+        add_image = st.button(label="Upload!", key="upload_image")
         
-        if add_media:
-            if input_file:
+        if add_image:
+            if image_input_file:
                 # Save image to path
-                dest_path = "temp/" + input_file.name
+                dest_path = "temp/" + image_input_file.name
                 # Write to path
                 with open(dest_path, "wb") as f:
-                    f.write(input_file.getvalue())
+                    f.write(image_input_file.getvalue())
                     
-                st.session_state.image_source = input_file
+                st.session_state.image_source = image_input_file
                 
     # Add response to chat
-    if add_media:
+    if add_image:
         print("Sumbit image...")
         if st.session_state.image_source == None:
             print("No image file...")
@@ -182,6 +187,48 @@ def main():
 
             # st.session_state.nutrition_conv.append({'role': 'assistant', 'content': "This is an image of " + response + ". What are it's nutrients?"})
         st.rerun()
+        
+    with st.sidebar.expander("➕ &nbsp; Add Recording", expanded=False):
+        # Upload audio
+        audio_file = None
+        audio_file = st.file_uploader(
+            "Add one audio file",
+            type=["mp4", "avi", "mov", "mkv", "mp3", "wav", "m4a"],
+            accept_multiple_files=False,
+        )
+        # TODO: Add record option later
+        add_audio_media = st.button(label="Upload", key="add_audio_media")
+
+        if add_audio_media:
+            if audio_file:
+                # Save to temp dir
+                dest_path = "temp/" + audio_file.name
+                # Save file to destination path
+                with open(dest_path, "wb") as f:
+                    f.write(audio_file.getvalue())
+                # Add to sources list
+                # st.session_state.audio_source.append(str(dest_path))
+                st.session_state.audio_source = str(dest_path)
+        
+            else:
+                st.error("Please upload files")
+                
+    # Add voice media to chat, generate response
+    if add_audio_media:
+        print("Submit audio...")
+        if len(st.session_state.audio_source) == 0:
+            print("No audio files...")
+            st.warning('No uploaded audio files...', icon="⚠️")
+        else:
+            st.chat_input("Ask a question", key="disabled_chat_input", disabled=True)
+            print("Speech to text...")
+            with st.chat_message("user"):
+                with st.spinner("Uploading..."):
+                    text_from_audio = speech_to_text(st.session_state.audio_source)
+                    st.write(text_from_audio)
+                    # print("Speech to text result: ",text_from_audio)
+                st.session_state.nutrition_conv.append({"role": "user", "content": "STT: " + text_from_audio})
+            st.rerun()
 
 if __name__ == "__main__":
     main()
