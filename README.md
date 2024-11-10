@@ -1,5 +1,8 @@
 # talk-is-cheap
-Multi-modal AI application for research based fitness and diet coaching. 
+Multi-modal AI personal health coach for research paper based fitness and diet coaching. 
+Frontend made with streamlit, supports text and speech input，backend made with Django.（
+AI using Langchain and Huggingface, creating a vector database on research based knowledge for embeddings. 
+Agent functions allow for AI personal coach to access user SQL data to make tailored advice. 
 
 ## environment
 1. create a `.env` file and create the following 
@@ -29,7 +32,11 @@ python create_db_script.py --sql_script create_nutrition_db.sql --database_path 
 streamlit run app.py
 ```
 
-
+## demo
+![image](https://github.com/lusr18/talk-is-cheap/blob/main/assets/demo1.jpg)
+![image](https://github.com/lusr18/talk-is-cheap/blob/main/assets/demo2.jpg)
+![image](https://github.com/lusr18/talk-is-cheap/blob/main/assets/demo3.jpg)
+![image](https://github.com/lusr18/talk-is-cheap/blob/main/assets/demo4.jpg)
 
 
 
